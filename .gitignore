@@ -23,3 +23,9 @@ go.work.sum
 
 # env file
 .env
+
+
+# Postgres global excludes
+
+# Global excludes across all subdirectories
+postgres-data

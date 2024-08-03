@@ -1,20 +1,27 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-
-	"example.com/taskapp/internal/models"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World from %s", app.Domain)
+
+	var payload = struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+		Version string `json:"version"`
+	}{
+		Status:  "active",
+		Message: "Golang Task manager app",
+		Version: "1.0.0",
+	}
+	_ = app.writeJson(w, http.StatusOK, payload)
 }
 func (app *application) allTaskContainers(w http.ResponseWriter, r *http.Request) {
-	var TaskContainers []models.TaskContainer
-	container := models.TaskContainer{ContainerId: "containerIdTestikng", ContainerName: "", ContainerDesc: ""}
-
-	TaskContainers = append(TaskContainers, container)
-
-	fmt.Println("Endpoint hit: All Task Containers.")
+	containers, err := app.DB.AllTaskContainers()
+	if err != nil {
+		app.errorJson(w, err)
+		return
+	}
+	_ = app.writeJson(w, http.StatusOK, containers)
 }
