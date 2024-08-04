@@ -56,7 +56,30 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 }
 
 func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
-	var container *TaskContainer
-	err := m.DB.QueryRow("select id,name,description from public.taskcontainer where id = ?", id).Scan(id)
+	rows, err := m.DB.Query("SELECT id,name,description FROM public.taskcontainer WHERE id = $1", id)
+	if err != nil {
+		return nil, err
+	}
+
+	container := new(TaskContainer)
+	for rows.Next() {
+		container, err = scanRowsIntoContainer(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return container, err
+}
+func scanRowsIntoContainer(rows *sql.Rows) (*TaskContainer, error) {
+	container := new(TaskContainer)
+	err := rows.Scan(
+		&container.ContainerId,
+		&container.ContainerName,
+		&container.ContainerDesc,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
 }
