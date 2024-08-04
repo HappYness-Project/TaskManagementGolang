@@ -95,11 +95,7 @@ ALTER TABLE public.movies ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
 );
 
 
---
--- Name: users; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.users (
+CREATE TABLE public.user (
     id integer NOT NULL,
     first_name character varying(255),
     last_name character varying(255),
@@ -109,12 +105,7 @@ CREATE TABLE public.users (
     updated_at timestamp without time zone
 );
 
-
---
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+ALTER TABLE public.user ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
     SEQUENCE NAME public.users_id_seq
     START WITH 1
     INCREMENT BY 1
@@ -174,7 +165,7 @@ COPY public.movies_genres (id, movie_id, genre_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.users (id, first_name, last_name, email, password, created_at, updated_at) FROM stdin;
+COPY public.user (id, first_name, last_name, email, password, created_at, updated_at) FROM stdin;
 1	Admin	User	admin@example.com	$2a$14$wVsaPvJnJJsomWArouWCtusem6S/.Gauq/GjOIEHpyh2DAMmso1wy	2022-09-23 00:00:00	2022-09-23 00:00:00
 \.
 
@@ -235,8 +226,8 @@ ALTER TABLE ONLY public.movies
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.user
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
 
 --

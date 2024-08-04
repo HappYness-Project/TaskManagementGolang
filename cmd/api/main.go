@@ -5,19 +5,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 
-	"example.com/taskapp/internal/repository"
+	"example.com/taskapp/internal/taskcontainer"
+	"example.com/taskapp/internal/user"
 )
 
 const port = 8080
 
 type application struct {
-	DSN    string
-	Domain string
-	DB     repository.ContainerRepository
-	// UserDBRepo repository.UserRepository
-	database *sql.DB
+	DSN           string
+	Domain        string
+	containerRepo taskcontainer.ContainerRepository
+	userRepo      user.UserRepository
+	database      *sql.DB
 }
 
 func main() {
@@ -33,13 +33,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.DB = &repository.ContainerRepo{DB: database}
-	// app.UserDBRepo = &dbrepo.
+	app.containerRepo = taskcontainer.NewContainerRepository(database)
+	// app.userRepo = user.NewUserRepository(database)
 	defer app.database.Close()
 
 	app.Domain = "example.com"
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
-	if err != nil {
+	// err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	server := NewApiServer(fmt.Sprintf(":%d", port), database)
+	if err := server.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

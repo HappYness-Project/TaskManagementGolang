@@ -13,7 +13,7 @@ type JSONResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
-func (app *application) writeJson(w http.ResponseWriter, status int, data interface{}, headers ...http.Header) error {
+func (app *application) WriteJson(w http.ResponseWriter, status int, data interface{}, headers ...http.Header) error {
 	out, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -58,5 +58,5 @@ func (app *application) errorJson(w http.ResponseWriter, err error, status ...in
 	var payload JSONResponse
 	payload.Error = true
 	payload.Message = err.Error()
-	return app.writeJson(w, statusCode, payload)
+	return app.WriteJson(w, statusCode, payload)
 }

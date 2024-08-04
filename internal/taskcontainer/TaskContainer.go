@@ -1,4 +1,4 @@
-package models
+package taskcontainer
 
 type TaskContainer struct {
 	ContainerId   string `json:id`

@@ -1,24 +1,23 @@
-package repository
+package taskcontainer
 
 import (
 	"context"
 	"database/sql"
 	"time"
-
-	"example.com/taskapp/internal/models"
 )
 
 const dbTimeout = time.Second * 5
 
 type ContainerRepository interface {
-	AllTaskContainers() ([]*models.TaskContainer, error)
+	AllTaskContainers() ([]*TaskContainer, error)
+	GetById(id string) (*TaskContainer, error)
 }
 
 type ContainerRepo struct {
 	DB *sql.DB
 }
 
-func NewContainerRepo(db *sql.DB) *ContainerRepo {
+func NewContainerRepository(db *sql.DB) *ContainerRepo {
 	return &ContainerRepo{
 		DB: db,
 	}
@@ -28,22 +27,20 @@ func (m *ContainerRepo) Connection() *sql.DB {
 	return m.DB
 }
 
-func (m *ContainerRepo) AllTaskContainers() ([]*models.TaskContainer, error) {
+func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `
-		select id,name,description from public.taskcontainer
-	`
+	query := `select id,name,description from public.taskcontainer`
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var containers []*models.TaskContainer
+	var containers []*TaskContainer
 	for rows.Next() {
-		var container models.TaskContainer
+		var container TaskContainer
 		err := rows.Scan(
 			&container.ContainerId,
 			&container.ContainerName,
@@ -56,4 +53,10 @@ func (m *ContainerRepo) AllTaskContainers() ([]*models.TaskContainer, error) {
 		containers = append(containers, &container)
 	}
 	return containers, nil
+}
+
+func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
+	var container *TaskContainer
+	err := m.DB.QueryRow("select id,name,description from public.taskcontainer where id = ?", id).Scan(id)
+	return container, err
 }
