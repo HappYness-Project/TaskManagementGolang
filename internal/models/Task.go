@@ -8,6 +8,6 @@ type Task struct {
 	TaskDesc    string    `json:task_desc`
 	CreatedDate time.Time `json:"-"`
 	UpdatedAt   time.Time `json:"-"`
-	TargetDate  time.Time `json:target_date`
+	TargetDate  time.Time `json:"-"`
 	IsCompleted bool      `json:is_completed`
 }
