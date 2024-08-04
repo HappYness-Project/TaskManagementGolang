@@ -8,6 +8,8 @@ import (
 )
 
 func (app *application) routes() http.Handler {
+	// containerRepo := repository.NewContainerRepo(app.database)
+	// containerRepo.
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
 	mux.Get("/", app.Home)

@@ -25,3 +25,7 @@ func (app *application) allTaskContainers(w http.ResponseWriter, r *http.Request
 	}
 	_ = app.writeJson(w, http.StatusOK, containers)
 }
+
+func (app *application) allTasksByContainerId(w http.ResponseWriter, r *http.Request) {
+	// tasks, err := app.DB.
+}

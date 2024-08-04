@@ -1,4 +1,4 @@
-package dbrepo
+package repository
 
 import (
 	"context"
@@ -8,17 +8,27 @@ import (
 	"example.com/taskapp/internal/models"
 )
 
-type PostgresDbRepo struct {
+const dbTimeout = time.Second * 5
+
+type ContainerRepository interface {
+	AllTaskContainers() ([]*models.TaskContainer, error)
+}
+
+type ContainerRepo struct {
 	DB *sql.DB
 }
 
-const dbTimeout = time.Second * 5
+func NewContainerRepo(db *sql.DB) *ContainerRepo {
+	return &ContainerRepo{
+		DB: db,
+	}
+}
 
-func (m *PostgresDbRepo) Connection() *sql.DB {
+func (m *ContainerRepo) Connection() *sql.DB {
 	return m.DB
 }
 
-func (m *PostgresDbRepo) AllTaskContainers() ([]*models.TaskContainer, error) {
+func (m *ContainerRepo) AllTaskContainers() ([]*models.TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -46,5 +56,4 @@ func (m *PostgresDbRepo) AllTaskContainers() ([]*models.TaskContainer, error) {
 		containers = append(containers, &container)
 	}
 	return containers, nil
-
 }
