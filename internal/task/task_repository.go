@@ -56,21 +56,21 @@ func (m *TaskRepo) GetTaskById(id string) (*Task, error) {
 		return nil, err
 	}
 
-	container := new(Task)
+	task := new(Task)
 	for rows.Next() {
-		container, err = scanRowsIntoTask(rows)
+		task, err = scanRowsIntoTask(rows)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return container, err
+	return task, err
 }
 
 func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select * from public.task` // TODO Update this statement.
+	query := `select * from public.task where ` // TODO Update this statement.
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -118,6 +118,13 @@ func scanRowsIntoTask(rows *sql.Rows) (*Task, error) {
 		&task.TaskName,
 		&task.TaskDesc,
 		&task.TaskType,
+		&task.CreatedAt,
+		&task.UpdatedAt,
+		&task.TargetDate,
+		&task.Priority,
+		&task.Category,
+		&task.IsCompleted,
+		&task.IsImportant,
 	)
 	if err != nil {
 		return nil, err

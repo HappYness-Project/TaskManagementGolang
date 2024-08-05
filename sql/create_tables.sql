@@ -36,12 +36,13 @@ CREATE TABLE IF NOT EXISTS public.usergroup (
 
 CREATE TABLE IF NOT EXISTS public.task (
     id uuid NOT NULL,
-    name character varying(255) NOT NULL,
+    name character varying(100) NOT NULL,
     description character varying(512),
+    type CHARACTER VARYING(20),
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     target_date timestamp with time zone,
-    priority character varying(200),
+    priority character varying(50),
     category character varying(20),
     is_completed boolean NOT NULL,
     is_important boolean NOT NULL,
@@ -105,7 +106,7 @@ INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (2, 5);
 
 INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', 'grovery', 'grocery container for my family', true, 0, 'normal', 1);
 INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('22095f67-168a-47f4-9d77-90cf27d77c89', 'chores', 'chores container for my family', true, 0, 'normal', 1);
-INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('94d277a0-245a-4155-aea3-29f6cbabd849', 'Apple', 'need this for apple pie', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '6 days', 'normal', 'grocery', false, false);
-INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('06e1840f-b5a9-4008-9add-7170272291d1', 'Banana', 'need this for breakfast', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '3 days', 'high', 'grocery', false, false);
+INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('94d277a0-245a-4155-aea3-29f6cbabd849', 'Apple', 'need this for apple pie', '', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '6 days', 'normal', 'grocery', false, false);
+INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('06e1840f-b5a9-4008-9add-7170272291d1', 'Banana', 'need this for breakfast', '', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '3 days', 'high', 'grocery', false, false);
 INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', '94d277a0-245a-4155-aea3-29f6cbabd849');
 INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', '06e1840f-b5a9-4008-9add-7170272291d1');
