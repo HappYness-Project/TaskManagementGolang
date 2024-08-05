@@ -23,10 +23,6 @@ func NewContainerRepository(db *sql.DB) *ContainerRepo {
 	}
 }
 
-func (m *ContainerRepo) Connection() *sql.DB {
-	return m.DB
-}
-
 func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
@@ -45,7 +41,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 			return nil, err
 		}
 
-		containers = append(containers, &container)
+		containers = append(containers, container)
 	}
 	return containers, nil
 }

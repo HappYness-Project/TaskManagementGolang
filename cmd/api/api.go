@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"example.com/taskapp/internal/task"
 	"example.com/taskapp/internal/taskcontainer"
 	"example.com/taskapp/internal/user"
 	"github.com/go-chi/chi/v5"
@@ -34,6 +35,10 @@ func (s *ApiServer) Run() error {
 	containerRepo := taskcontainer.NewContainerRepository(s.db)
 	containerHandler := taskcontainer.NewHandler(containerRepo)
 	containerHandler.RegisterRoutes(mux)
+
+	taskRepo := task.NewTaskRepository(s.db)
+	taskHandler := task.NewHandler(taskRepo)
+	taskHandler.RegisterRoutes(mux)
 
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, mux)
