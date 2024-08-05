@@ -5,19 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
-
-	"example.com/taskapp/internal/taskcontainer"
-	"example.com/taskapp/internal/user"
 )
 
 const port = 8080
 
 type application struct {
-	DSN           string
-	Domain        string
-	containerRepo taskcontainer.ContainerRepository
-	userRepo      user.UserRepository
-	database      *sql.DB
+	DSN      string
+	Domain   string
+	database *sql.DB
 }
 
 func main() {
@@ -33,11 +28,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	app.containerRepo = taskcontainer.NewContainerRepository(database)
-	// app.userRepo = user.NewUserRepository(database)
-	defer app.database.Close()
-
-	app.Domain = "example.com"
 	// err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
 	// if err != nil {
 	// 	log.Fatal(err)

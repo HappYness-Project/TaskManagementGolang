@@ -40,12 +40,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 
 	var containers []*TaskContainer
 	for rows.Next() {
-		var container TaskContainer
-		err := rows.Scan(
-			&container.ContainerId,
-			&container.ContainerName,
-			&container.ContainerDesc,
-		)
+		container, err := scanRowsIntoContainer(rows)
 		if err != nil {
 			return nil, err
 		}

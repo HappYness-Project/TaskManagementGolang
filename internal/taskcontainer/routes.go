@@ -18,7 +18,6 @@ func NewHandler(repo ContainerRepository) *Handler {
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/task-containers", h.handleGetTaskContainers)
 	router.Get("/task-containers/{containerID}", h.handleGetTaskContainerById)
-	// router.HandleFunc("/users/{userId}", h.handleGetUser).Methods(http.MethodGet)
 }
 func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.containerRepo.AllTaskContainers()

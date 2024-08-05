@@ -56,6 +56,6 @@ func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
 }
 func (m *UserRepo) GetUserById(id int) (*User, error) {
 	var user *User
-	err := m.DB.QueryRow("select * from public.user where id = ?", id).Scan(id)
+	err := m.DB.QueryRow("select * from public.user where id = $1", id).Scan(id)
 	return user, err
 }

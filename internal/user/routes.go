@@ -1,7 +1,9 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
@@ -17,7 +19,7 @@ func NewHandler(repo UserRepository) *Handler {
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/users", h.handleGetUsers)
-	// router.HandleFunc("/users/{userId}", h.handleGetUser).Methods(http.MethodGet)
+	router.Get("/users/{userID}", h.handleGetUser)
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
@@ -29,14 +31,21 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, users)
 }
 
-// func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
-// 	userid := chi.URLParam(r, "userId")
-// 	ctx := r.Context()
-// 	user, ok := ctx.Value("user").(*User)
-// 	if !ok {
-// 		http.Error(w, http.StatusText(422), 422)
-// 		return
-// 	}
-// 	w.Write([]byte(fmt.Sprintf("Username:%s", user.UserName)))
-
-// }
+func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "userID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing User ID"))
+		return
+	}
+	userID, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		return
+	}
+	user, err := h.userRepo.GetUserById(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, user)
+}
