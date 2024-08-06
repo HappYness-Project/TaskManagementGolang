@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"example.com/taskapp/internal/taskcontainer"
 	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -74,14 +76,25 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
 	// Validate if task container exists.
-
 	var task *Task
 	err = json.Unmarshal(body, &task)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
+		return
 	}
+
+	task.TaskId = uuid.NewString()
+	task.CreatedAt = time.Now()
+	task.UpdatedAt = time.Now()
+	task.IsCompleted = false
+	task.IsImportant = false
+	_, err = h.taskRepo.CreateTask(*task)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
 }
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 }

@@ -91,7 +91,9 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 }
 
 func (m *TaskRepo) CreateTask(task Task) (*Task, error) {
-	_, err := m.DB.Exec(`INSERT INTO public.task ()`)
+	_, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+		task.TaskId, task.TaskName, task.TaskDesc, task.TaskType, task.CreatedAt, task.UpdatedAt, task.TargetDate, task.Priority, task.Category, task.IsCompleted, task.IsImportant)
 	if err != nil {
 		return nil, fmt.Errorf("unable to insert row : %w", err)
 	}
