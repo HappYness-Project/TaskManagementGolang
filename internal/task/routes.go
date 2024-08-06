@@ -6,16 +6,18 @@ import (
 	"io"
 	"net/http"
 
+	"example.com/taskapp/internal/taskcontainer"
 	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
-	taskRepo TaskRepository
+	taskRepo      TaskRepository
+	containerRepo taskcontainer.ContainerRepository
 }
 
-func NewHandler(repo TaskRepository) *Handler {
-	return &Handler{taskRepo: repo}
+func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository) *Handler {
+	return &Handler{taskRepo: repo, containerRepo: tcRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
@@ -24,7 +26,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Put("/", h.handleUpdateTask)
 		r.Delete("/", h.handleDeleteTask)
 	})
-	router.Get("/api/task-containers/{containerID}/tasks", h.handleGetTaskByContainerId)
+	router.Get("/api/task-containers/{containerID}/tasks", h.handleGetTasksByContainerId)
 	router.Post("/api/task-containers/{containerID}/tasks", h.handleCreateTask)
 }
 func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
@@ -51,8 +53,18 @@ func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, task)
 }
 
-func (h *Handler) handleGetTaskByContainerId(w http.ResponseWriter, r *http.Request) {
-	// tasks, err := h.taskRepo.GetAllTasksByContainerId()
+func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Request) {
+	containerId := chi.URLParam(r, "containerID")
+	if containerId == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
+		return
+	}
+	tasks, err := h.taskRepo.GetTasksByContainerId(containerId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("getting tasks failure"))
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, tasks)
 }
 
 func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +74,8 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
+
+	// Validate if task container exists.
 
 	var task *Task
 	err = json.Unmarshal(body, &task)

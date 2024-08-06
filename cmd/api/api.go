@@ -37,7 +37,7 @@ func (s *ApiServer) Run() error {
 	containerHandler.RegisterRoutes(mux)
 
 	taskRepo := task.NewTaskRepository(s.db)
-	taskHandler := task.NewHandler(taskRepo)
+	taskHandler := task.NewHandler(taskRepo, containerRepo)
 	taskHandler.RegisterRoutes(mux)
 
 	log.Println("Listening on ", s.addr)
