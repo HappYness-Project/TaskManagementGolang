@@ -8,6 +8,7 @@ import (
 	"example.com/taskapp/internal/task"
 	"example.com/taskapp/internal/taskcontainer"
 	"example.com/taskapp/internal/user"
+	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -28,6 +29,9 @@ func (s *ApiServer) Run() error {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
 
+	// main home page.
+	mux.Get("/", home)
+
 	userRepo := user.NewUserRepository(s.db)
 	userHandler := user.NewHandler(userRepo)
 	userHandler.RegisterRoutes(mux)
@@ -42,4 +46,17 @@ func (s *ApiServer) Run() error {
 
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, mux)
+}
+func home(w http.ResponseWriter, r *http.Request) {
+
+	var payload = struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+		Version string `json:"version"`
+	}{
+		Status:  "active",
+		Message: "Golang Task manager app",
+		Version: "1.0.0",
+	}
+	utils.WriteJSON(w, http.StatusOK, payload)
 }
