@@ -77,19 +77,25 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	// Validate if task container exists.
-	var task *Task
-	err = json.Unmarshal(body, &task)
+	var createDto *CreateTaskDto
+	err = json.Unmarshal(body, &createDto)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
+	var task Task
 	task.TaskId = uuid.NewString()
 	task.CreatedAt = time.Now()
 	task.UpdatedAt = time.Now()
+	task.TaskName = createDto.TaskName
+	task.TaskDesc = createDto.TaskDesc
+	task.TaskType = "normal"
+	task.Priority = createDto.Priority
+	task.TargetDate = createDto.TargetDate
+	task.Category = createDto.Category
 	task.IsCompleted = false
 	task.IsImportant = false
-	_, err = h.taskRepo.CreateTask(*task)
+	_, err = h.taskRepo.CreateTask(task)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

@@ -33,8 +33,7 @@ func (m *TaskRepo) GetAllTasks() ([]*Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select * from public.task`
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, sqlGetAllTasks)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +50,7 @@ func (m *TaskRepo) GetAllTasks() ([]*Task, error) {
 }
 
 func (m *TaskRepo) GetTaskById(id string) (*Task, error) {
-	rows, err := m.DB.Query("SELECT * FROM public.task WHERE id = $1", id)
+	rows, err := m.DB.Query(sqlGetTaskById, id)
 	if err != nil {
 		return nil, err
 	}
