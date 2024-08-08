@@ -27,7 +27,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := `select id,name,description from public.taskcontainer`
+	query := sqlGetAllContainers
 	rows, err := m.DB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 }
 
 func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
-	rows, err := m.DB.Query("SELECT id,name,description FROM public.taskcontainer WHERE id = $1", id)
+	rows, err := m.DB.Query(sqlGetById, id)
 	if err != nil {
 		return nil, err
 	}
