@@ -28,7 +28,6 @@ func TestTaskContainerHandler(t *testing.T) {
 			t.Errorf("expected status code %d, got %d", http.StatusOK, rr.Code)
 		}
 	})
-
 	t.Run("when get task container by containerId, Then return status code 200", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/api/task-containers/abcd", nil)
 		if err != nil {

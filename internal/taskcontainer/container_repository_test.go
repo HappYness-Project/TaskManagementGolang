@@ -21,7 +21,6 @@ func mockContainerRows(container TaskContainer) *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "name", "description"}).
 		AddRow(container.ContainerId, container.ContainerName, container.ContainerDesc)
 }
-
 func TestContainerRepo_AllTaskContainers(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
@@ -49,7 +48,6 @@ func TestContainerRepo_AllTaskContainers(t *testing.T) {
 		require.Len(t, containers, 0)
 	})
 }
-
 func TestContainerRepo_ContainerById(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
