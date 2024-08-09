@@ -23,8 +23,8 @@ func openDb(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func (app *application) connectToDb() (*sql.DB, error) {
-	conn, err := openDb(app.DSN)
+func connectToDb(connStr string) (*sql.DB, error) {
+	conn, err := openDb(connStr)
 	if err != nil {
 		return nil, err
 	}

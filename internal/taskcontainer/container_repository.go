@@ -27,8 +27,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	query := sqlGetAllContainers
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, sqlGetAllContainers)
 	if err != nil {
 		return nil, err
 	}
