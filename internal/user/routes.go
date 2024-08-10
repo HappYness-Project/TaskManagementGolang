@@ -18,8 +18,9 @@ func NewHandler(repo UserRepository) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
-	router.Get("/users", h.handleGetUsers)
-	router.Get("/users/{userID}", h.handleGetUser)
+	router.Get("/api/users", h.handleGetUsers)
+	router.Get("/api/users/{userID}", h.handleGetUser)
+	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +44,25 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, err := h.userRepo.GetUserById(userID)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
+		return
+	}
+	utils.WriteJSON(w, http.StatusOK, user)
+}
+
+func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "groupID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		return
+	}
+	groupId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		return
+	}
+	user, err := h.userRepo.GetUsersByGroupId(groupId)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
