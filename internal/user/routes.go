@@ -25,6 +25,16 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "email")
+	if vars != "" {
+		user, err := h.userRepo.GetUserByEmail(vars)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+		utils.WriteJSON(w, http.StatusOK, user)
+		return
+	}
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -51,7 +61,6 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.WriteJSON(w, http.StatusOK, user)
 }
-
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {

@@ -54,15 +54,16 @@ func (m *TaskRepo) GetTaskById(id string) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	task := new(Task)
+	var task *Task
 	for rows.Next() {
 		task, err = scanRowsIntoTask(rows)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return task, err
+	return task, nil
 }
 
 func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {

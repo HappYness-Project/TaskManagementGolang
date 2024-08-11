@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS public.usergroup_user (
 
 
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('hyunbin7303', 'kevin', 'park', 'kpark@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('bumsoo1234', 'sam', 'kim', 'bumsoo1234@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
