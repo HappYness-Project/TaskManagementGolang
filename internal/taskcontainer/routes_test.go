@@ -3,6 +3,7 @@ package taskcontainer
 import (
 	"net/http"
 	"net/http/httptest"
+	"os/user"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -10,7 +11,8 @@ import (
 
 func TestTaskContainerHandler(t *testing.T) {
 	repo := &mockContainerRepo{}
-	handler := NewHandler(repo)
+	// userRepo := &mockUserRepo{}
+	handler := NewHandler(repo, nil) // Need to be fixed.
 
 	t.Run("when get all task containers, Then return status code 200", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/api/task-containers", nil)
@@ -53,4 +55,10 @@ func (m *mockContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 }
 func (m *mockContainerRepo) GetById(id string) (*TaskContainer, error) {
 	return &TaskContainer{}, nil
+}
+
+type mockUserRepo struct{}
+
+func (m *mockUserRepo) GetAllUsers() ([]*user.User, error) {
+	return []*user.User{}, nil
 }

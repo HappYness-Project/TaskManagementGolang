@@ -4,21 +4,24 @@ import (
 	"fmt"
 	"net/http"
 
+	"example.com/taskapp/internal/auth"
+	"example.com/taskapp/internal/user"
 	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
 	containerRepo ContainerRepository
+	userRepo      user.UserRepository
 }
 
-func NewHandler(repo ContainerRepository) *Handler {
-	return &Handler{containerRepo: repo}
+func NewHandler(repo ContainerRepository, userRepo user.UserRepository) *Handler {
+	return &Handler{containerRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/task-containers", func(r chi.Router) {
 		r.Get("/", h.handleGetTaskContainers)
-		r.Get("/{containerID}", h.handleGetTaskContainerById)
+		r.Get("/{containerID}", auth.WithJWTAuth(h.handleGetTaskContainerById))
 	})
 }
 func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request) {

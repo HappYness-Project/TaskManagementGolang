@@ -66,6 +66,8 @@ func scanRowsIntoContainer(rows *sql.Rows) (*TaskContainer, error) {
 		&container.ContainerId,
 		&container.ContainerName,
 		&container.ContainerDesc,
+		&container.IsActive,
+		&container.UsergroupId,
 	)
 	if err != nil {
 		return nil, err

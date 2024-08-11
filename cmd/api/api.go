@@ -29,7 +29,6 @@ func (s *ApiServer) Run() error {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
 
-	// main home page.
 	mux.Get("/", home)
 
 	userRepo := user.NewUserRepository(s.db)
@@ -37,7 +36,7 @@ func (s *ApiServer) Run() error {
 	userHandler.RegisterRoutes(mux)
 
 	containerRepo := taskcontainer.NewContainerRepository(s.db)
-	containerHandler := taskcontainer.NewHandler(containerRepo)
+	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
 	containerHandler.RegisterRoutes(mux)
 
 	taskRepo := task.NewTaskRepository(s.db)

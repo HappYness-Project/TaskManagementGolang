@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"example.com/taskapp/internal/auth"
 	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
 )
@@ -19,8 +20,8 @@ func NewHandler(repo UserRepository) *Handler {
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/users", h.handleGetUsers)
-	router.Get("/api/users/{userID}", h.handleGetUser)
-	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
+	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
+	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {

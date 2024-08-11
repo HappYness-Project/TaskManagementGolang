@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"example.com/taskapp/cmd/configs"
 	"example.com/taskapp/utils"
@@ -16,10 +15,10 @@ type contextKey string
 
 const UserKey contextKey = "userID"
 
-func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.HandlerFunc {
+func WithJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenString := utils.GetTokenFromRequest(r)
-
+		tokenString = tokenString[len("Bearer "):]
 		token, err := validateJWT(tokenString)
 		if err != nil {
 			log.Printf("failed to validate token: %v", err)
@@ -34,28 +33,10 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-		str := claims["userID"].(string)
-
-		userID, err := strconv.Atoi(str)
-		if err != nil {
-			log.Printf("failed to convert userID to int: %v", err)
-			permissionDenied(w)
-			return
-		}
-
-		u, err := store.GetUserByID(userID)
-		if err != nil {
-			log.Printf("failed to get user by id: %v", err)
-			permissionDenied(w)
-			return
-		}
-
-		// Add the user to the context
+		email := claims["email"]
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, UserKey, u.ID)
+		ctx = context.WithValue(ctx, UserKey, email)
 		r = r.WithContext(ctx)
-
-		// Call the function if the token is valid
 		handlerFunc(w, r)
 	}
 }
