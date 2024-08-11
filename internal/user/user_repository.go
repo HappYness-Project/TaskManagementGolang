@@ -78,9 +78,9 @@ func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
 		&user.FirstName,
 		&user.LastName,
 		&user.Email,
-		&user.CreatedAt,
 		&user.IsActive,
-		&user.UserSettingId,
+		&user.CreatedAt,
+		&user.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
