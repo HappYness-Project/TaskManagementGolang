@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"example.com/taskapp/internal/auth"
-	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/happYness-Project/taskManagementGolang/internal/auth"
+	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type Handler struct {
@@ -19,7 +19,7 @@ func NewHandler(repo UserRepository) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
-	router.Get("/api/users", h.handleGetUsers)
+	router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
 	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
 	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }

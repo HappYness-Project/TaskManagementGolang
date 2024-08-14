@@ -1,0 +1,26 @@
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/happYness-Project/taskManagementGolang/cmd/api"
+	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
+	"github.com/happYness-Project/taskManagementGolang/cmd/db"
+)
+
+func main() {
+	env := configs.Envs
+	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
+		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
+
+	log.Print(connStr)
+	database, err := db.ConnectToDb(connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	server := api.NewApiServer(fmt.Sprintf(":%d", env.Port), database)
+	if err := server.Run(); err != nil {
+		log.Fatal(err)
+	}
+}

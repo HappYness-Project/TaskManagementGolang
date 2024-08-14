@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"example.com/taskapp/internal/taskcontainer"
 	"github.com/go-chi/chi/v5"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 )
 
 func TestTaskHandler(t *testing.T) {

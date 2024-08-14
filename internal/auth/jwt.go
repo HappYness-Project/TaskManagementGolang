@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"example.com/taskapp/cmd/configs"
-	"example.com/taskapp/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
+	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type contextKey string
@@ -47,7 +47,7 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(configs.NewEnv().AccessTokenSecret), nil
+		return []byte(configs.Envs.AccessTokenSecret), nil
 	})
 }
 func GetUserIDFromContext(ctx context.Context) int {

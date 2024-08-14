@@ -1,4 +1,4 @@
-module example.com/taskapp
+module github.com/happYness-Project/taskManagementGolang
 
 go 1.22.5
 

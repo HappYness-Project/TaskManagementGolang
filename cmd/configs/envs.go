@@ -1,7 +1,9 @@
 package configs
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -24,11 +26,28 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-func NewEnv() *Env {
+var Envs = initConfig()
+
+func initConfig() Env {
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(path)
+
+	files, err := os.ReadDir("/")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		fmt.Println(file.Name(), file.IsDir())
+	}
+
 	env := Env{}
 	viper.SetConfigFile(".env")
 
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		log.Fatal("Can't find the file .env : ", err)
 	}
@@ -42,5 +61,5 @@ func NewEnv() *Env {
 		log.Println("The App is running in development env")
 	}
 
-	return &env
+	return env
 }

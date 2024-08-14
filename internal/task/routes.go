@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"example.com/taskapp/internal/taskcontainer"
-	"example.com/taskapp/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
+	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type Handler struct {
