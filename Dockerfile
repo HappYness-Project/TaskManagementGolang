@@ -14,7 +14,7 @@ FROM scratch AS build-release-stage
   WORKDIR /
 
   COPY --from=build-stage /api /api
-  COPY .env .
+  COPY docker.env .
 
   EXPOSE 8080
 

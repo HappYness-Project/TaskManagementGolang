@@ -24,16 +24,20 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-var Envs = initConfig()
+var Envs = initConfig("docker")
 
-func initConfig() Env {
+func initConfig(envSetup string) Env {
 
 	env := Env{}
-	viper.SetConfigFile(".env")
+	if envSetup == "development" {
+		viper.SetConfigFile("development.env")
+	} else {
+		viper.SetConfigFile("docker.env")
+	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatal("Can't find the file .env : ", err)
+		log.Fatal("Can't find the environment file : ", err)
 	}
 
 	err = viper.Unmarshal(&env)
