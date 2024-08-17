@@ -20,6 +20,7 @@ func NewHandler(repo UserRepository) *Handler {
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
+	// router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
 	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
 	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }
@@ -35,6 +36,7 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 		utils.WriteJSON(w, http.StatusOK, user)
 		return
 	}
+
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)

@@ -8,6 +8,7 @@ type UserRepository interface {
 	GetAllUsers() ([]*User, error)
 	GetUserById(id int) (*User, error)
 	GetUserByEmail(email string) (*User, error)
+	GetUserByUsername(username string) (*User, error)
 	GetUsersByGroupId(groupId int) ([]*User, error)
 	Create(user User) error
 }
@@ -39,16 +40,52 @@ func (s *UserRepo) GetAllUsers() ([]*User, error) {
 }
 
 func (m *UserRepo) GetUserById(id int) (*User, error) {
-	var user *User
-	err := m.DB.QueryRow(sqlGetUserById, id).Scan(id)
+	rows, err := m.DB.Query(sqlGetUserById, id)
+	if err != nil {
+		return nil, err
+	}
+
+	user := new(User)
+	for rows.Next() {
+		user, err = scanRowsIntoUser(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return user, err
 }
 
 func (m *UserRepo) GetUserByEmail(email string) (*User, error) {
-	var user *User
-	err := m.DB.QueryRow(sqlGetUserByEmail, email).Scan(email)
+	rows, err := m.DB.Query(sqlGetUserByEmail, email)
+	if err != nil {
+		return nil, err
+	}
+
+	user := new(User)
+	for rows.Next() {
+		user, err = scanRowsIntoUser(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return user, err
 }
+func (m *UserRepo) GetUserByUsername(username string) (*User, error) {
+	rows, err := m.DB.Query(sqlGetUserByUsername, username)
+	if err != nil {
+		return nil, err
+	}
+
+	user := new(User)
+	for rows.Next() {
+		user, err = scanRowsIntoUser(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return user, err
+}
+
 func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
 	rows, err := m.DB.Query(sqlGetUsersByGroupId, groupId)
 	if err != nil {
