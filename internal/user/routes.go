@@ -27,8 +27,18 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	emailVars := r.URL.Query().Get("email")
+	userVars := r.URL.Query().Get("username")
 	if emailVars != "" {
 		user, err := h.userRepo.GetUserByEmail(emailVars)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+		utils.WriteJSON(w, http.StatusOK, user)
+		return
+	}
+	if userVars != "" {
+		user, err := h.userRepo.GetUserByUsername(userVars)
 		if err != nil {
 			utils.WriteError(w, http.StatusBadRequest, err)
 			return
