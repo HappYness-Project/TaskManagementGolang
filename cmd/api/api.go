@@ -10,6 +10,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/internal/task"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
@@ -43,6 +44,10 @@ func (s *ApiServer) Run() error {
 	taskRepo := task.NewTaskRepository(s.db)
 	taskHandler := task.NewHandler(taskRepo, containerRepo)
 	taskHandler.RegisterRoutes(mux)
+
+	usergroupRepo := usergroup.NewUserGroupRepository(s.db)
+	usergroupHandler := usergroup.NewHandler(usergroupRepo)
+	usergroupHandler.RegisterRoutes(mux)
 
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, mux)

@@ -75,7 +75,8 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, user)
+	userJson, _ := json.Marshal(user)
+	utils.WriteJSON(w, http.StatusOK, userJson)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")

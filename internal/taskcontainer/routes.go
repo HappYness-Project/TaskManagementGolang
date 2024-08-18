@@ -40,7 +40,6 @@ func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	// TODO Requirement - check if container ID is UUID format.
-
 	container, err := h.containerRepo.GetById(containerId)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("container does not exist"))
