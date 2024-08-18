@@ -31,7 +31,7 @@ func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, users)
+	utils.WriteJsonWithEncode(w, http.StatusOK, users)
 }
 func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")
@@ -46,5 +46,5 @@ func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Requ
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("container does not exist"))
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, container)
+	utils.WriteJsonWithEncode(w, http.StatusOK, container)
 }

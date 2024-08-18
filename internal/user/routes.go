@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -34,7 +35,8 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusBadRequest, err)
 			return
 		}
-		utils.WriteJSON(w, http.StatusOK, user)
+		userJson, _ := json.Marshal(user)
+		utils.WriteJSON(w, http.StatusOK, userJson)
 		return
 	}
 	if userVars != "" {
@@ -43,7 +45,8 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusBadRequest, err)
 			return
 		}
-		utils.WriteJSON(w, http.StatusOK, user)
+		userJson, _ := json.Marshal(user)
+		utils.WriteJSON(w, http.StatusOK, userJson)
 		return
 	}
 
@@ -52,7 +55,8 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, users)
+	userJson, _ := json.Marshal(users)
+	utils.WriteJSON(w, http.StatusOK, userJson)
 }
 
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
@@ -71,7 +75,7 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, user)
+	utils.WriteJsonWithEncode(w, http.StatusOK, user)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
@@ -89,5 +93,5 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, user)
+	utils.WriteJsonWithEncode(w, http.StatusOK, user)
 }

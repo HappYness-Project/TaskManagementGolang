@@ -37,7 +37,7 @@ func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, tasks)
+	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }
 func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
 	taskId := chi.URLParam(r, "taskID")
@@ -52,7 +52,7 @@ func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("task does not exist"))
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, task)
+	utils.WriteJsonWithEncode(w, http.StatusOK, task)
 }
 
 func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +66,7 @@ func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Req
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("getting tasks failure"))
 		return
 	}
-	utils.WriteJSON(w, http.StatusOK, tasks)
+	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }
 
 func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {

@@ -58,5 +58,5 @@ func home(w http.ResponseWriter, r *http.Request) {
 		Message: "Golang Task manager app",
 		Version: "1.0.0",
 	}
-	utils.WriteJSON(w, http.StatusOK, payload)
+	utils.WriteJsonWithEncode(w, http.StatusOK, payload)
 }
