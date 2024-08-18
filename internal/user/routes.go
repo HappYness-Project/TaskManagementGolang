@@ -8,15 +8,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type Handler struct {
-	userRepo UserRepository
+	userRepo      UserRepository
+	userGroupRepo usergroup.UserGroupRepository
 }
 
-func NewHandler(repo UserRepository) *Handler {
-	return &Handler{userRepo: repo}
+func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+	return &Handler{userRepo: repo, userGroupRepo: ugRepo}
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {

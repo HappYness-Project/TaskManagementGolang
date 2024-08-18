@@ -34,20 +34,19 @@ func (s *ApiServer) Run() error {
 	mux.Get("/", home)
 
 	userRepo := user.NewUserRepository(s.db)
-	userHandler := user.NewHandler(userRepo)
-	userHandler.RegisterRoutes(mux)
-
-	containerRepo := taskcontainer.NewContainerRepository(s.db)
-	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
-	containerHandler.RegisterRoutes(mux)
-
-	taskRepo := task.NewTaskRepository(s.db)
-	taskHandler := task.NewHandler(taskRepo, containerRepo)
-	taskHandler.RegisterRoutes(mux)
-
 	usergroupRepo := usergroup.NewUserGroupRepository(s.db)
+	taskRepo := task.NewTaskRepository(s.db)
+	containerRepo := taskcontainer.NewContainerRepository(s.db)
+
+	userHandler := user.NewHandler(userRepo, usergroupRepo)
 	usergroupHandler := usergroup.NewHandler(usergroupRepo)
+	taskHandler := task.NewHandler(taskRepo, containerRepo)
+	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
+
+	userHandler.RegisterRoutes(mux)
 	usergroupHandler.RegisterRoutes(mux)
+	taskHandler.RegisterRoutes(mux)
+	containerHandler.RegisterRoutes(mux)
 
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, mux)
