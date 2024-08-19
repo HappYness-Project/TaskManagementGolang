@@ -24,7 +24,7 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-var Envs = initConfig("docker")
+var Envs = initConfig("development")
 
 func initConfig(envSetup string) Env {
 

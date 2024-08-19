@@ -37,7 +37,31 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 			utils.WriteError(w, http.StatusBadRequest, err)
 			return
 		}
-		userJson, _ := json.Marshal(user)
+		var defaultGroupId int
+		if user.UserSettingId != 0 {
+			defaultGroupId, err = h.userRepo.GetDefaultGroupId(user.UserSettingId)
+			if err != nil {
+				utils.WriteError(w, http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		userDetailDto := new(UserDetailDto)
+		ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+		userDetailDto.Id = user.Id
+		userDetailDto.UserName = user.UserName
+		userDetailDto.FirstName = user.FirstName
+		userDetailDto.LastName = user.LastName
+		userDetailDto.Email = user.Email
+		userDetailDto.IsActive = user.IsActive
+		userDetailDto.DefaultGroupId = defaultGroupId
+		userDetailDto.UserGroup = ugs
+
+		userJson, _ := json.Marshal(userDetailDto)
 		utils.WriteJSON(w, http.StatusOK, userJson)
 		return
 	}
@@ -49,6 +73,7 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 		}
 		userJson, _ := json.Marshal(user)
 		utils.WriteJSON(w, http.StatusOK, userJson)
+		// TODO Should response with user group and user setting information.
 		return
 	}
 

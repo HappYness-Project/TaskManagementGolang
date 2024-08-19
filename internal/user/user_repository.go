@@ -10,6 +10,7 @@ type UserRepository interface {
 	GetUserByEmail(email string) (*User, error)
 	GetUserByUsername(username string) (*User, error)
 	GetUsersByGroupId(groupId int) ([]*User, error)
+	GetDefaultGroupId(settingId int) (int, error)
 	Create(user User) error
 }
 type UserRepo struct {
@@ -106,6 +107,16 @@ func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
 func (m *UserRepo) Create(user User) error {
 	return nil
 }
+func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
+	var groupId int
+	if err := m.DB.QueryRow(sqlGetDefaultGroupId, settingId).Scan(&groupId); err != nil {
+		if err == sql.ErrNoRows {
+			return 0, err
+		}
+		return 0, err
+	}
+	return groupId, nil
+}
 func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
 	user := new(User)
 
@@ -118,6 +129,7 @@ func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
 		&user.IsActive,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.UserSettingId,
 	)
 	if err != nil {
 		return nil, err

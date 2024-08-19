@@ -91,25 +91,36 @@ CREATE TABLE IF NOT EXISTS public.usergroup_user (
   CONSTRAINT fk_usergroup_user_user_id FOREIGN KEY(user_id) REFERENCES public.user(id)
 );
 
+INSERT INTO public.usersetting(id, default_group_id) VALUES (1, 1);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (2, 1);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (3, 0);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (4, 0);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (5, 0);
 
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('bumsoo1234', 'sam', 'kim', 'bumsoo1234@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00');
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',1);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00', 2);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('bumsoo1234', 'sam', 'kim', 'bumsoo1234@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',3);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',4);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',5);
 
 INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (1, 'user group #1', 'Description for user group 1', 'normal', '', true);
 INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (2, 'user group #2', 'Description for user group 2', 'normal', '', true);
 INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (3, 'user group #3', 'Description for user group 3', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (4, 'user group #4', 'Description for user group 4', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (5, 'user group #5', 'Description for user group 5', 'normal', '', false);
 
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 1);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 2);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 3);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (2, 4);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (2, 5);
+INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (3, 1);
+INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (4, 2);
+INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (5, 1);
 
-INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', 'grovery', 'grocery container for my family', true, 0, 'normal', 1);
+INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', 'grocery', 'grocery container for my family', true, 0, 'normal', 1);
 INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('22095f67-168a-47f4-9d77-90cf27d77c89', 'chores', 'chores container for my family', true, 0, 'normal', 1);
+INSERT INTO public.taskcontainer(id, name, description, is_active, activity_level, type, usergroup_id) VALUES ('9ccba4b5-4745-4d5c-8901-46b159c71516', 'grocery', 'grocery container for my family', true, 0, 'normal', 2);
 INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('94d277a0-245a-4155-aea3-29f6cbabd849', 'Apple', 'need this for apple pie', '', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '6 days', 'normal', 'grocery', false, false);
 INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important) VALUES ('06e1840f-b5a9-4008-9add-7170272291d1', 'Banana', 'need this for breakfast', '', CURRENT_DATE,CURRENT_DATE,CURRENT_DATE + INTERVAL  '3 days', 'high', 'grocery', false, false);
 INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id) VALUES ('5951f639-c8ce-4462-8b72-c57458c448fd', '94d277a0-245a-4155-aea3-29f6cbabd849');
