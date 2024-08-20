@@ -116,6 +116,8 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	userDetailDto.UserName = user.UserName
 	userDetailDto.FirstName = user.FirstName
 	userDetailDto.LastName = user.LastName
+	userDetailDto.CreatedAt = user.CreatedAt
+	userDetailDto.UpdatedAt = user.UpdatedAt
 	userDetailDto.Email = user.Email
 	userDetailDto.IsActive = user.IsActive
 	userDetailDto.DefaultGroupId = defaultGroupId

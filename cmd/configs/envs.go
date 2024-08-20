@@ -24,16 +24,12 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-var Envs = initConfig("development")
+var Envs = initConfig()
 
-func initConfig(envSetup string) Env {
+func initConfig() Env {
 
 	env := Env{}
-	if envSetup == "development" {
-		viper.SetConfigFile("development.env")
-	} else {
-		viper.SetConfigFile("docker.env")
-	}
+	viper.SetConfigFile("development.env")
 
 	err := viper.ReadInConfig()
 	if err != nil {

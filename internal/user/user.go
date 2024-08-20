@@ -28,6 +28,8 @@ type UserDetailDto struct {
 	UserName       string                 `json:"username"`
 	FirstName      string                 `json:"first_name"`
 	LastName       string                 `json:"last_name"`
+	CreatedAt      time.Time              `json:"created_at"`
+	UpdatedAt      time.Time              `json:"updated_at"`
 	Email          string                 `json:"email"`
 	IsActive       bool                   `json:"is_active"`
 	DefaultGroupId int                    `json:"default_group_id"`
