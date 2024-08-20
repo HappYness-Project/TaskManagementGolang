@@ -29,54 +29,13 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
-	emailVars := r.URL.Query().Get("email")
-	userVars := r.URL.Query().Get("username")
-	if emailVars != "" {
-		user, err := h.userRepo.GetUserByEmail(emailVars)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
-		var defaultGroupId int
-		if user.UserSettingId != 0 {
-			defaultGroupId, err = h.userRepo.GetDefaultGroupId(user.UserSettingId)
-			if err != nil {
-				utils.WriteError(w, http.StatusBadRequest, err)
-				return
-			}
-		}
-
-		userDetailDto := new(UserDetailDto)
-		ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
-		userDetailDto.Id = user.Id
-		userDetailDto.UserName = user.UserName
-		userDetailDto.FirstName = user.FirstName
-		userDetailDto.LastName = user.LastName
-		userDetailDto.Email = user.Email
-		userDetailDto.IsActive = user.IsActive
-		userDetailDto.DefaultGroupId = defaultGroupId
-		userDetailDto.UserGroup = ugs
-
-		userJson, _ := json.Marshal(userDetailDto)
-		utils.WriteJSON(w, http.StatusOK, userJson)
+	if r.URL.Query().Get("email") != "" {
+		h.responseUserUsingEmail(w, "email", r.URL.Query().Get("email"))
+		return
+	} else if r.URL.Query().Get("username") != "" {
+		h.responseUserUsingEmail(w, "username", r.URL.Query().Get("username"))
 		return
 	}
-	if userVars != "" {
-		user, err := h.userRepo.GetUserByUsername(userVars)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
-		userJson, _ := json.Marshal(user)
-		utils.WriteJSON(w, http.StatusOK, userJson)
-		// TODO Should response with user group and user setting information.
-		return
-	}
-
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
@@ -122,4 +81,46 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, user)
+}
+func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string, findVar string) {
+	var user *User
+	var err error
+	if findField == "email" {
+		user, err = h.userRepo.GetUserByEmail(findVar)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+	} else if findField == "username" {
+		user, err = h.userRepo.GetUserByUsername(findVar)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+	}
+	var defaultGroupId int
+	if user.UserSettingId != 0 {
+		defaultGroupId, err = h.userRepo.GetDefaultGroupId(user.UserSettingId)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, err)
+			return
+		}
+	}
+	userDetailDto := new(UserDetailDto)
+	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	userDetailDto.Id = user.Id
+	userDetailDto.UserName = user.UserName
+	userDetailDto.FirstName = user.FirstName
+	userDetailDto.LastName = user.LastName
+	userDetailDto.Email = user.Email
+	userDetailDto.IsActive = user.IsActive
+	userDetailDto.DefaultGroupId = defaultGroupId
+	userDetailDto.UserGroup = ugs
+
+	userJson, _ := json.Marshal(userDetailDto)
+	utils.WriteJSON(w, http.StatusOK, userJson)
 }
