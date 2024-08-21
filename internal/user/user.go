@@ -24,14 +24,14 @@ type UserSetting struct {
 }
 
 type UserDetailDto struct {
-	Id             int                    `json:"id"`
-	UserName       string                 `json:"username"`
-	FirstName      string                 `json:"first_name"`
-	LastName       string                 `json:"last_name"`
-	CreatedAt      time.Time              `json:"created_at"`
-	UpdatedAt      time.Time              `json:"updated_at"`
-	Email          string                 `json:"email"`
-	IsActive       bool                   `json:"is_active"`
-	DefaultGroupId int                    `json:"default_group_id"`
-	UserGroup      []*usergroup.UserGroup `json:"usergroup"`
+	Id          int                    `json:"id"`
+	UserName    string                 `json:"username"`
+	FirstName   string                 `json:"first_name"`
+	LastName    string                 `json:"last_name"`
+	CreatedAt   time.Time              `json:"created_at"`
+	UpdatedAt   time.Time              `json:"updated_at"`
+	Email       string                 `json:"email"`
+	IsActive    bool                   `json:"is_active"`
+	UserSetting *UserSetting           `json:"user_setting"`
+	UserGroup   []*usergroup.UserGroup `json:"usergroup"`
 }

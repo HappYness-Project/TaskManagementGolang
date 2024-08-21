@@ -16,5 +16,6 @@ const (
 							ON u.id = ugu.user_id
 							WHERE ugu.usergroup_id = $1`
 
-	sqlGetDefaultGroupId = `SELECT default_group_id FROM public.usersetting WHERE id = $1`
+	sqlGetDefaultGroupId  = `SELECT default_group_id FROM public.usersetting WHERE id = $1`
+	sqlGetUserSettingById = `SELECT * FROM public.usersetting WHERE id = $1`
 )

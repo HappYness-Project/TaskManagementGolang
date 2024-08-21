@@ -98,14 +98,7 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 			return
 		}
 	}
-	var defaultGroupId int
-	if user.UserSettingId != 0 {
-		defaultGroupId, err = h.userRepo.GetDefaultGroupId(user.UserSettingId)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
-	}
+
 	userDetailDto := new(UserDetailDto)
 	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
@@ -120,8 +113,9 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	userDetailDto.UpdatedAt = user.UpdatedAt
 	userDetailDto.Email = user.Email
 	userDetailDto.IsActive = user.IsActive
-	userDetailDto.DefaultGroupId = defaultGroupId
 	userDetailDto.UserGroup = ugs
+	usersetting, _ := h.userRepo.GetGroupSettingByUserId(user.Id)
+	userDetailDto.UserSetting = usersetting
 
 	userJson, _ := json.Marshal(userDetailDto)
 	utils.WriteJSON(w, http.StatusOK, userJson)

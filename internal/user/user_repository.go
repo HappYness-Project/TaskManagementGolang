@@ -11,6 +11,7 @@ type UserRepository interface {
 	GetUserByUsername(username string) (*User, error)
 	GetUsersByGroupId(groupId int) ([]*User, error)
 	GetDefaultGroupId(settingId int) (int, error)
+	GetGroupSettingByUserId(id int) (*UserSetting, error)
 	Create(user User) error
 }
 type UserRepo struct {
@@ -117,6 +118,17 @@ func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
 	}
 	return groupId, nil
 }
+func (m *UserRepo) GetGroupSettingByUserId(id int) (*UserSetting, error) {
+	usersetting := UserSetting{}
+	if err := m.DB.QueryRow(sqlGetUserSettingById, id).Scan(&usersetting.Id, &usersetting.DefaultGroupId); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, err
+	}
+	return &usersetting, nil
+}
+
 func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
 	user := new(User)
 
