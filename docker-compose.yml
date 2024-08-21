@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # restart: alway
+    restart: always
     volumes:
       - .:/go/src/api
     ports:

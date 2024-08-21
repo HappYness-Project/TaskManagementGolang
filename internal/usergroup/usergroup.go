@@ -1,7 +1,7 @@
 package usergroup
 
 type UserGroup struct {
-	GroupId   string `json:"id"`
+	GroupId   int    `json:"id"`
 	GroupName string `json:"name"`
 	GroupDesc string `json:"description"`
 	Type      string `json:"type"`

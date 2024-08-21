@@ -33,5 +33,5 @@ type UserDetailDto struct {
 	Email       string                 `json:"email"`
 	IsActive    bool                   `json:"is_active"`
 	UserSetting *UserSetting           `json:"user_setting"`
-	UserGroup   []*usergroup.UserGroup `json:"usergroup"`
+	UserGroup   []*usergroup.UserGroup `json:"user_groups"`
 }
