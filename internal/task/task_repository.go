@@ -88,24 +88,21 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 
 func (m *TaskRepo) CreateTask(containerId string, req CreateTaskDto) (int64, error) {
 	taskId := uuid.New()
-	result, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important)
+	_, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
 		taskId, req.TaskName, req.TaskDesc, time.Now(), time.Now(), req.TargetDate, req.Priority, req.Category, false, false)
 	if err != nil {
-		return 0, fmt.Errorf("unable to insert row : %w", err)
+		return 0, fmt.Errorf("unable to insert into task table : %w", err)
 	}
-	num, _ := result.LastInsertId()
-	if num == 0 {
-		_, err = m.DB.Exec(`INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id)
-			VALUES ($1, $2)`,
-			containerId, taskId)
+	_, err = m.DB.Exec(`INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id)
+		VALUES ($1, $2)`,
+		containerId, taskId)
 
-		if err != nil {
-			return 0, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
-		}
+	if err != nil {
+		return 0, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
 	}
 
-	return num, nil
+	return 0, nil
 }
 
 func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {
@@ -113,6 +110,14 @@ func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {
 }
 
 func (m *TaskRepo) DeleteTask(id string) error {
+	_, err := m.DB.Exec(`DELETE FROM public.taskcontainer_task WHERE task_id=$1`, id)
+	if err != nil {
+		return err
+	}
+	_, err = m.DB.Exec(`DELETE FROM public.task WHERE id=$1`, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

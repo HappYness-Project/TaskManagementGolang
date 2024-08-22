@@ -24,7 +24,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Get("/", h.handleGetTasks)
 		r.Get("/{taskID}", h.handleGetTask)
 		r.Put("/", h.handleUpdateTask)
-		r.Delete("/", h.handleDeleteTask)
+		r.Delete("/{taskID}", h.handleDeleteTask)
 	})
 	router.Get("/api/task-containers/{containerID}/tasks", h.handleGetTasksByContainerId)
 	router.Post("/api/task-containers/{containerID}/tasks", h.handleCreateTask)
@@ -44,7 +44,6 @@ func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// TODO Requirement - check if container ID is UUID format.
-
 	task, err := h.taskRepo.GetTaskById(taskId)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("task does not exist"))
@@ -75,7 +74,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 	}
 	container, err := h.containerRepo.GetById(containerId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container."))
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container"))
 		return
 	}
 	body, err := io.ReadAll(r.Body)
@@ -101,4 +100,16 @@ func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
+	taskId := chi.URLParam(r, "taskID")
+	if taskId == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
+		return
+	}
+	err := h.taskRepo.DeleteTask(taskId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during deleting a task"))
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusNoContent, "task has been removed.")
+
 }
