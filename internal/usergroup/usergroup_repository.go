@@ -49,6 +49,7 @@ func (m *UserGroupRepo) GetById(id int) (*UserGroup, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	usergroup := new(UserGroup)
 	for rows.Next() {

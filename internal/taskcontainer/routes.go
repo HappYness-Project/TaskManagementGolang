@@ -29,12 +29,13 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/user-groups/{usergroupID}/task-containers", auth.WithJWTAuth(h.handleGetTaskContainersByGroupId))
 }
 func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.containerRepo.AllTaskContainers()
+	containers, err := h.containerRepo.AllTaskContainers()
 	if err != nil {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, users)
+	containersJson, _ := json.Marshal(containers)
+	utils.WriteJSON(w, http.StatusOK, containersJson)
 }
 func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")

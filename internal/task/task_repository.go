@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const dbTimeout = time.Second * 5
@@ -13,8 +15,8 @@ type TaskRepository interface {
 	GetAllTasks() ([]*Task, error)
 	GetTaskById(id string) (*Task, error)
 	GetTasksByContainerId(containerId string) ([]*Task, error)
-	CreateTask(task Task) (*Task, error)
-	UpdateTask(task Task) error
+	CreateTask(taskcontainerId string, req CreateTaskDto) (int64, error)
+	UpdateTask(req UpdateTaskDto) error
 	UpdateImportantTask(id string) error
 	DeleteTask(id string) error
 	DoneTask(id string) error
@@ -84,17 +86,29 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	return tasks, nil
 }
 
-func (m *TaskRepo) CreateTask(task Task) (*Task, error) {
-	_, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, type, created_at, updated_at, target_date, priority, category, is_completed, is_important)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-		task.TaskId, task.TaskName, task.TaskDesc, task.TaskType, task.CreatedAt, task.UpdatedAt, task.TargetDate, task.Priority, task.Category, task.IsCompleted, task.IsImportant)
+func (m *TaskRepo) CreateTask(containerId string, req CreateTaskDto) (int64, error) {
+	taskId := uuid.New()
+	result, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+		taskId, req.TaskName, req.TaskDesc, time.Now(), time.Now(), req.TargetDate, req.Priority, req.Category, false, false)
 	if err != nil {
-		return nil, fmt.Errorf("unable to insert row : %w", err)
+		return 0, fmt.Errorf("unable to insert row : %w", err)
 	}
-	return &task, nil
+	num, _ := result.LastInsertId()
+	if num == 0 {
+		_, err = m.DB.Exec(`INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id)
+			VALUES ($1, $2)`,
+			containerId, taskId)
+
+		if err != nil {
+			return 0, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
+		}
+	}
+
+	return num, nil
 }
 
-func (m *TaskRepo) UpdateTask(task Task) error {
+func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {
 	return nil
 }
 

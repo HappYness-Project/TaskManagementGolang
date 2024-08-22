@@ -59,13 +59,13 @@ func (m *mockTaskRepo) GetTaskById(id string) (*Task, error) {
 func (m *mockTaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	return []*Task{}, nil
 }
-func (m *mockTaskRepo) CreateTask(task Task) (*Task, error) {
-	return &Task{}, nil
+func (m *mockTaskRepo) CreateTask(containerId string, req CreateTaskDto) (int64, error) {
+	return 0, nil
 }
-func (m *mockTaskRepo) DeleteTask(id string) error {
+func (m *mockTaskRepo) UpdateTask(task UpdateTaskDto) error {
 	return nil
 }
-func (m *mockTaskRepo) UpdateTask(task Task) error {
+func (m *mockTaskRepo) DeleteTask(id string) error {
 	return nil
 }
 func (m *mockTaskRepo) DoneTask(id string) error {

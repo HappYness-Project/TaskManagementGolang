@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
@@ -70,37 +68,34 @@ func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Req
 }
 
 func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
+	containerId := chi.URLParam(r, "containerID")
+	if containerId == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
+		return
+	}
+	container, err := h.containerRepo.GetById(containerId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container."))
+		return
+	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
-	// Validate if task container exists.
+
 	var createDto *CreateTaskDto
 	err = json.Unmarshal(body, &createDto)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	var task Task
-	task.TaskId = uuid.NewString()
-	task.CreatedAt = time.Now()
-	task.UpdatedAt = time.Now()
-	task.TaskName = createDto.TaskName
-	task.TaskDesc = createDto.TaskDesc
-	task.TaskType = "normal"
-	task.Priority = createDto.Priority
-	task.TargetDate = createDto.TargetDate
-	task.Category = createDto.Category
-	task.IsCompleted = false
-	task.IsImportant = false
-	_, err = h.taskRepo.CreateTask(task)
+	_, err = h.taskRepo.CreateTask(container.ContainerId, *createDto)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
 }
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 }

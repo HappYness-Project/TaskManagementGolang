@@ -19,7 +19,6 @@ func NewHandler(repo UserGroupRepository) *Handler {
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/user-groups", func(r chi.Router) {
-		// TODO Jwt Middleware setup in here, maybe more higher level if possible.
 		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
 	})
