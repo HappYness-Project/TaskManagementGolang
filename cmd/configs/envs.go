@@ -24,10 +24,9 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-var Envs = initConfig()
+var AccessToken string // updated from the main package.
 
-func initConfig() Env {
-
+func InitConfig() Env {
 	env := Env{}
 	viper.SetConfigFile("development.env")
 

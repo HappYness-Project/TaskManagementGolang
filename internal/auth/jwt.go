@@ -47,7 +47,7 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(configs.Envs.AccessTokenSecret), nil
+		return []byte(configs.AccessToken), nil
 	})
 }
 func GetUserIDFromContext(ctx context.Context) int {

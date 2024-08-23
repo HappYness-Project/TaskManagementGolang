@@ -96,6 +96,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
@@ -111,5 +112,4 @@ func (h *Handler) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusNoContent, "task has been removed.")
-
 }
