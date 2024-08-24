@@ -15,7 +15,7 @@ type TaskRepository interface {
 	GetAllTasks() ([]*Task, error)
 	GetTaskById(id string) (*Task, error)
 	GetTasksByContainerId(containerId string) ([]*Task, error)
-	CreateTask(taskcontainerId string, req CreateTaskDto) (int64, error)
+	CreateTask(taskcontainerId string, req CreateTaskDto) (uuid.UUID, error)
 	UpdateTask(req UpdateTaskDto) error
 	UpdateImportantTask(id string) error
 	DeleteTask(id string) error
@@ -86,23 +86,22 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	return tasks, nil
 }
 
-func (m *TaskRepo) CreateTask(containerId string, req CreateTaskDto) (int64, error) {
+func (m *TaskRepo) CreateTask(containerId string, req CreateTaskDto) (uuid.UUID, error) {
 	taskId := uuid.New()
-	_, err := m.DB.Exec(`INSERT INTO public.task(id, name, description, created_at, updated_at, target_date, priority, category, is_completed, is_important)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-		taskId, req.TaskName, req.TaskDesc, time.Now(), time.Now(), req.TargetDate, req.Priority, req.Category, false, false)
+	_, err := m.DB.Exec(sqlCreateTask,
+		taskId, req.TaskName, req.TaskDesc, "", time.Now(), time.Now(), req.TargetDate, req.Priority, req.Category, false, false)
 	if err != nil {
-		return 0, fmt.Errorf("unable to insert into task table : %w", err)
+		return uuid.Nil, fmt.Errorf("unable to insert into task table : %w", err)
 	}
 	_, err = m.DB.Exec(`INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id)
 		VALUES ($1, $2)`,
 		containerId, taskId)
 
 	if err != nil {
-		return 0, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
+		return uuid.Nil, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
 	}
 
-	return 0, nil
+	return taskId, nil
 }
 
 func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {

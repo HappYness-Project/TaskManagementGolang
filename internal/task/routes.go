@@ -92,11 +92,12 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	_, err = h.taskRepo.CreateTask(container.ContainerId, *createDto)
+	uuid, err := h.taskRepo.CreateTask(container.ContainerId, *createDto)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+	utils.WriteJsonWithEncode(w, http.StatusCreated, uuid)
 }
 
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
