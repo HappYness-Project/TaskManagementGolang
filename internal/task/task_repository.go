@@ -75,7 +75,7 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	}
 	defer rows.Close()
 
-	var tasks []*Task
+	tasks := []*Task{}
 	for rows.Next() {
 		task, err := scanRowsIntoTask(rows)
 		if err != nil {
