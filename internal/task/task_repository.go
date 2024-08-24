@@ -19,7 +19,7 @@ type TaskRepository interface {
 	UpdateTask(req UpdateTaskDto) error
 	UpdateImportantTask(id string) error
 	DeleteTask(id string) error
-	DoneTask(id string) error
+	DoneTask(id string, isDone bool) error
 }
 type TaskRepo struct {
 	DB *sql.DB
@@ -110,18 +110,23 @@ func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {
 }
 
 func (m *TaskRepo) DeleteTask(id string) error {
-	_, err := m.DB.Exec(`DELETE FROM public.taskcontainer_task WHERE task_id=$1`, id)
+	_, err := m.DB.Exec(sqlDeleteTaskFromJoinTable, id)
 	if err != nil {
 		return err
 	}
-	_, err = m.DB.Exec(`DELETE FROM public.task WHERE id=$1`, id)
+	_, err = m.DB.Exec(sqlDeleteTask, id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (m *TaskRepo) DoneTask(id string) error {
+func (m *TaskRepo) DoneTask(id string, isDone bool) error {
+	_, err := m.DB.Exec(sqlUpdateTaskDoneField, isDone, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

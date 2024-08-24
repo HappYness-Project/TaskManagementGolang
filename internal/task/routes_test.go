@@ -68,7 +68,7 @@ func (m *mockTaskRepo) UpdateTask(task UpdateTaskDto) error {
 func (m *mockTaskRepo) DeleteTask(id string) error {
 	return nil
 }
-func (m *mockTaskRepo) DoneTask(id string) error {
+func (m *mockTaskRepo) DoneTask(id string, isDone bool) error {
 	return nil
 }
 func (m *mockTaskRepo) UpdateImportantTask(id string) error {

@@ -8,4 +8,8 @@ const (
 									JOIN public.taskcontainer_task tct
 									ON t.id = tct.task_id
 									WHERE taskcontainer_id = $1`
+
+	sqlDeleteTaskFromJoinTable = `DELETE FROM public.taskcontainer_task WHERE task_id=$1`
+	sqlDeleteTask              = `DELETE FROM public.task WHERE id=$1`
+	sqlUpdateTaskDoneField     = `UPDATE public.task SET is_completed=$1 WHERE id = $2;`
 )
