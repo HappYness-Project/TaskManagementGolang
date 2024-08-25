@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const dbTimeout = time.Second * 5
@@ -15,8 +13,8 @@ type TaskRepository interface {
 	GetAllTasks() ([]*Task, error)
 	GetTaskById(id string) (*Task, error)
 	GetTasksByContainerId(containerId string) ([]*Task, error)
-	CreateTask(taskcontainerId string, req CreateTaskDto) (uuid.UUID, error)
-	UpdateTask(req UpdateTaskDto) error
+	CreateTask(taskcontainerId string, task Task) (Task, error)
+	UpdateTask(task Task) error
 	UpdateImportantTask(id string) error
 	DeleteTask(id string) error
 	DoneTask(id string, isDone bool) error
@@ -86,30 +84,27 @@ func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	return tasks, nil
 }
 
-func (m *TaskRepo) CreateTask(containerId string, req CreateTaskDto) (uuid.UUID, error) {
-	taskId := uuid.New()
-	_, err := m.DB.Exec(sqlCreateTask,
-		taskId, req.TaskName, req.TaskDesc, "", time.Now(), time.Now(), req.TargetDate, req.Priority, req.Category, false, false)
+func (m *TaskRepo) CreateTask(containerId string, task Task) (Task, error) {
+	_, err := m.DB.Exec(sqlCreateTask, task.TaskId, task.TaskName, task.TaskDesc, task.TaskType, task.CreatedAt, task.UpdatedAt, task.TargetDate, task.Priority, task.Category, task.IsCompleted, task.IsImportant)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("unable to insert into task table : %w", err)
+		return task, fmt.Errorf("unable to insert into task table : %w", err)
 	}
-	_, err = m.DB.Exec(`INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id)
-		VALUES ($1, $2)`,
-		containerId, taskId)
+	_, err = m.DB.Exec(sqlCreateTaskForJoinTable,
+		containerId, task.TaskId)
 
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
+		return task, fmt.Errorf("unable to insert into taskcontainer_task table : %w", err)
 	}
 
-	return taskId, nil
+	return task, nil
 }
 
-func (m *TaskRepo) UpdateTask(task UpdateTaskDto) error {
+func (m *TaskRepo) UpdateTask(task Task) error {
 	return nil
 }
 
 func (m *TaskRepo) DeleteTask(id string) error {
-	_, err := m.DB.Exec(sqlDeleteTaskFromJoinTable, id)
+	_, err := m.DB.Exec(sqlDeleteTaskForJoinTable, id)
 	if err != nil {
 		return err
 	}

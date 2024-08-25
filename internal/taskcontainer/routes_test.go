@@ -45,6 +45,7 @@ func TestTaskContainerHandler(t *testing.T) {
 		if rr.Code != http.StatusOK {
 			t.Errorf("expected status code %d, got %d", http.StatusOK, rr.Code)
 		}
+		defer rr.Result().Body.Close()
 	})
 }
 

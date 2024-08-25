@@ -10,19 +10,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func mockContainerObj() TaskContainer {
-	return TaskContainer{
-		ContainerId:   uuid.NewString(),
-		ContainerName: "testuser",
-		ContainerDesc: "testdesc",
-	}
-}
-func mockContainerRows(container TaskContainer) *sqlmock.Rows {
-	return sqlmock.NewRows([]string{"id", "name", "description"}).
-		AddRow(container.ContainerId, container.ContainerName, container.ContainerDesc)
-}
 func TestContainerRepo_AllTaskContainers(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	t.Parallel()
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
 	containerRepo := NewContainerRepository(db)
@@ -49,14 +39,15 @@ func TestContainerRepo_AllTaskContainers(t *testing.T) {
 	})
 }
 func TestContainerRepo_ContainerById(t *testing.T) {
-	db, mock, err := sqlmock.New()
+	t.Parallel()
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
 	containerRepo := NewContainerRepository(db)
 	t.Run("Container Exists", func(t *testing.T) {
 		mockContainer := mockContainerObj()
 		rows := mockContainerRows(mockContainer)
-		mock.ExpectQuery("SELECT (.+) FROM public.taskcontainer WHERE id = \\$1").
+		mock.ExpectQuery(sqlGetById).
 			WithArgs(mockContainer.ContainerId).
 			WillReturnRows(rows)
 
@@ -67,7 +58,7 @@ func TestContainerRepo_ContainerById(t *testing.T) {
 	})
 
 	t.Run("When Cannot find Container, Then return null", func(t *testing.T) {
-		mock.ExpectQuery("SELECT (.+) FROM public.taskcontainer WHERE id = \\$1").
+		mock.ExpectQuery(sqlGetById).
 			WithArgs("invalid")
 
 		container, err := containerRepo.GetById("invalid")
@@ -85,4 +76,38 @@ func TestContainerRepo_ContainerById(t *testing.T) {
 		require.Nil(t, container)
 		// TODO Need to update GetById to handle different scenario.
 	})
+}
+
+func TestContainerRepo_GetContainersByGroupId(t *testing.T) {
+	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	require.NoError(t, err)
+	defer db.Close()
+	containerRepo := NewContainerRepository(db)
+
+	t.Run("Containers exist for the given group id", func(t *testing.T) {
+		mockContainer := mockContainerObj()
+		rows := mockContainerRows(mockContainer)
+		mock.ExpectQuery(sqlGetContainersByGroupId).
+			WithArgs(mockContainer.UsergroupId).
+			WillReturnRows(rows)
+
+		container, err := containerRepo.GetContainersByGroupId(mockContainer.UsergroupId)
+
+		require.Nil(t, err)
+		require.Equal(t, &mockContainer, container[0])
+	})
+}
+
+func mockContainerObj() TaskContainer {
+	return TaskContainer{
+		ContainerId:   uuid.NewString(),
+		ContainerName: "testuser",
+		ContainerDesc: "testdesc",
+		IsActive:      true,
+		UsergroupId:   1,
+	}
+}
+func mockContainerRows(c TaskContainer) *sqlmock.Rows {
+	return sqlmock.NewRows([]string{"id", "name", "description", "is_active", "usergroup_id"}).
+		AddRow(c.ContainerId, c.ContainerName, c.ContainerDesc, c.IsActive, c.UsergroupId)
 }

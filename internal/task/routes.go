@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/utils"
@@ -92,7 +94,18 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	uuid, err := h.taskRepo.CreateTask(container.ContainerId, *createDto)
+	task := Task{
+		TaskId:     uuid.New().String(),
+		TaskName:   createDto.TaskName,
+		TaskDesc:   createDto.TaskDesc,
+		TaskType:   "",
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		TargetDate: createDto.TargetDate,
+		Priority:   createDto.Priority,
+		Category:   createDto.Category,
+	}
+	uuid, err := h.taskRepo.CreateTask(container.ContainerId, task)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

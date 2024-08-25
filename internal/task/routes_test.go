@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 )
 
@@ -60,10 +59,10 @@ func (m *mockTaskRepo) GetTaskById(id string) (*Task, error) {
 func (m *mockTaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
 	return []*Task{}, nil
 }
-func (m *mockTaskRepo) CreateTask(containerId string, req CreateTaskDto) (uuid.UUID, error) {
-	return uuid.Nil, nil
+func (m *mockTaskRepo) CreateTask(containerId string, req Task) (Task, error) {
+	return Task{}, nil
 }
-func (m *mockTaskRepo) UpdateTask(task UpdateTaskDto) error {
+func (m *mockTaskRepo) UpdateTask(task Task) error {
 	return nil
 }
 func (m *mockTaskRepo) DeleteTask(id string) error {
