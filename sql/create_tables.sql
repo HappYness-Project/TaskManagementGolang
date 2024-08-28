@@ -33,7 +33,7 @@ CREATE TABLE public.user (
 );
 -- SELECT pg_catalog.setval('public.users_id_seq', 1, true);
 CREATE TABLE IF NOT EXISTS public.usergroup (
-    id int NOT NULL,
+    id int NOT NULL generated always as identity,
     name CHARACTER VARYING(100) NOT NULL,
     description CHARACTER VARYING(255) NOT NULL,
     type CHARACTER VARYING(30),
@@ -103,11 +103,12 @@ INSERT INTO public.user(username, first_name, last_name, email, is_active, creat
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',4);
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',5);
 
-INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (1, 'user group #1', 'Description for user group 1', 'normal', '', true);
-INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (2, 'user group #2', 'Description for user group 2', 'normal', '', true);
-INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (3, 'user group #3', 'Description for user group 3', 'normal', '', true);
-INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (4, 'user group #4', 'Description for user group 4', 'normal', '', true);
-INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) VALUES (5, 'user group #5', 'Description for user group 5', 'normal', '', false);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (1, 'user group #1', 'Description for user group 1', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (2, 'user group #2', 'Description for user group 2', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (3, 'user group #3', 'Description for user group 3', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (4, 'user group #4', 'Description for user group 4', 'normal', '', true);
+INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (5, 'user group #5', 'Description for user group 5', 'normal', '', false);
+SELECT setval(pg_get_serial_sequence('public.usergroup', 'id'), (SELECT MAX(id) FROM public.usergroup)); -- Due to duplicate key violate issue - manually reset the a primary key index after restoring from a dump file.
 
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 1);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 2);

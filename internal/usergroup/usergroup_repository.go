@@ -3,6 +3,7 @@ package usergroup
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -12,6 +13,8 @@ type UserGroupRepository interface {
 	GetAllUsergroups() ([]*UserGroup, error)
 	GetById(id int) (*UserGroup, error)
 	GetUserGroupsByUserId(userId int) ([]*UserGroup, error)
+	CreateGroup(ug UserGroup) (int, error)
+	InsertUserGroupUserTable(groupId int, userId int) error
 }
 type UserGroupRepo struct {
 	DB *sql.DB
@@ -80,6 +83,22 @@ func (m *UserGroupRepo) GetUserGroupsByUserId(userId int) ([]*UserGroup, error) 
 		usergroups = append(usergroups, usergroup)
 	}
 	return usergroups, nil
+}
+func (m *UserGroupRepo) CreateGroup(ug UserGroup) (int, error) {
+	lastInsertedId := 0
+	err := m.DB.QueryRow(sqlCreateUserGroup, ug.GroupName, ug.GroupDesc, ug.Type, ug.Thumbnail, ug.IsActive).Scan(&lastInsertedId)
+	if err != nil {
+		return 0, fmt.Errorf("unable to insert into usergroup table : %w", err)
+	}
+
+	return lastInsertedId, nil
+}
+func (m *UserGroupRepo) InsertUserGroupUserTable(groupId int, userId int) error {
+	_, err := m.DB.Exec(sqlCreateUserGroupForJoinTable, groupId, userId)
+	if err != nil {
+		return fmt.Errorf("unable to insert into usergroup_user table : %w", err)
+	}
+	return nil
 }
 
 func scanRowsIntoUsergroup(rows *sql.Rows) (*UserGroup, error) {

@@ -1,7 +1,9 @@
 package usergroup
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -22,6 +24,8 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
 	})
+	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCraeteUserGroup))
+
 }
 
 func (h *Handler) handleGetUserGroups(w http.ResponseWriter, r *http.Request) {
@@ -50,4 +54,53 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, group)
+}
+
+func (h *Handler) handleCraeteUserGroup(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "userID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
+		return
+	}
+	userId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var createDto *CreateUserGroupDto
+	err = json.Unmarshal(body, &createDto)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	group := UserGroup{
+		GroupName: createDto.GroupName,
+		GroupDesc: createDto.GroupDesc,
+		Type:      createDto.GroupType,
+		IsActive:  true,
+		Thumbnail: "",
+	}
+	groupId, err := h.groupRepo.CreateGroup(group)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = h.groupRepo.InsertUserGroupUserTable(groupId, userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	utils.WriteJsonWithEncode(w, http.StatusCreated, "User group is created.")
+
 }

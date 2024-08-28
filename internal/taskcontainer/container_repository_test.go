@@ -68,7 +68,7 @@ func TestContainerRepo_ContainerById(t *testing.T) {
 	})
 
 	t.Run("Internal server error.", func(t *testing.T) {
-		mock.ExpectQuery("SELECT (.+) FROM public.taskcontainer WHERE id = \\$1").
+		mock.ExpectQuery(sqlGetById).
 			WithArgs("SomeError").WillReturnError(errors.New("random internal error occurred"))
 
 		container, err := containerRepo.GetById("invalid")
