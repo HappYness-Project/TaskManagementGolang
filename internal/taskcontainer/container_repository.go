@@ -11,7 +11,7 @@ const dbTimeout = time.Second * 5
 type ContainerRepository interface {
 	AllTaskContainers() ([]*TaskContainer, error)
 	GetById(id string) (*TaskContainer, error)
-	GetContainersByGroupId(groupId int) ([]*TaskContainer, error)
+	GetContainersByGroupId(groupId int) ([]TaskContainer, error)
 }
 
 type ContainerRepo struct {
@@ -62,7 +62,7 @@ func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
 	return container, err
 }
 
-func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]*TaskContainer, error) {
+func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -72,14 +72,14 @@ func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]*TaskContainer, e
 	}
 	defer rows.Close()
 
-	var containers []*TaskContainer
+	containers := []TaskContainer{}
 	for rows.Next() {
 		container, err := scanRowsIntoContainer(rows)
 		if err != nil {
 			return nil, err
 		}
 
-		containers = append(containers, container)
+		containers = append(containers, *container)
 	}
 	return containers, nil
 }

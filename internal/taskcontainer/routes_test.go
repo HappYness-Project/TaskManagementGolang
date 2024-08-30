@@ -57,8 +57,8 @@ func (m *mockContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 func (m *mockContainerRepo) GetById(id string) (*TaskContainer, error) {
 	return &TaskContainer{}, nil
 }
-func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]*TaskContainer, error) {
-	return []*TaskContainer{}, nil
+func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, error) {
+	return []TaskContainer{}, nil
 }
 
 type mockUserRepo struct{}
