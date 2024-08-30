@@ -24,7 +24,8 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
 	})
-	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCraeteUserGroup))
+	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
+	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
 
 }
 
@@ -44,7 +45,7 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid group ID"))
 		return
 	}
 
@@ -56,7 +57,7 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 	utils.WriteJsonWithEncode(w, http.StatusOK, group)
 }
 
-func (h *Handler) handleCraeteUserGroup(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "userID")
 	if vars == "" {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
@@ -102,5 +103,24 @@ func (h *Handler) handleCraeteUserGroup(w http.ResponseWriter, r *http.Request) 
 	}
 
 	utils.WriteJsonWithEncode(w, http.StatusCreated, "User group is created.")
+}
 
+func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "userID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
+		return
+	}
+	userId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		return
+	}
+
+	groups, err := h.groupRepo.GetUserGroupsByUserId(userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error occurred during GetUserGroupsByUserId"))
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusOK, groups)
 }

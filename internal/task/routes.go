@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type Handler struct {
 	taskRepo      TaskRepository
 	containerRepo taskcontainer.ContainerRepository
+	groupRepo     usergroup.UserGroupRepository
 }
 
-func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository) *Handler {
-	return &Handler{taskRepo: repo, containerRepo: tcRepo}
+func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+	return &Handler{taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
@@ -32,6 +35,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	})
 	router.Get("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleGetTasksByContainerId))
 	router.Post("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleCreateTask))
+	router.Get("/api/user-groups/{usergroupID}/tasks", auth.WithJWTAuth(h.handleGetTasksByGroupId))
 }
 func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.taskRepo.GetAllTasks()
@@ -158,5 +162,34 @@ func (h *Handler) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, "task is changed to Done.")
+}
 
+func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request) {
+	groupIdVar := chi.URLParam(r, "usergroupID")
+	if groupIdVar == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		return
+	}
+	groupId, err := strconv.Atoi(groupIdVar)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		return
+	}
+	usergroup, err := h.groupRepo.GetById(groupId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("usergroup cannot be found"))
+		return
+	}
+	tasks, err := h.taskRepo.GetAllTasksByGroupId(usergroup.GroupId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks"))
+		return
+	}
+	if r.URL.Query().Get("important") == "true" {
+
+	} else if r.URL.Query().Get("important") == "false" {
+
+	}
+
+	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }

@@ -12,7 +12,7 @@ import (
 func TestTaskHandler(t *testing.T) {
 	repo := &mockTaskRepo{}
 	containerRepo := &mockContainerRepo{}
-	handler := NewHandler(repo, containerRepo)
+	handler := NewHandler(repo, containerRepo, nil)
 
 	t.Run("when get all tasks, Then return status code 200", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/api/tasks", nil)
@@ -73,6 +73,9 @@ func (m *mockTaskRepo) DoneTask(id string, isDone bool) error {
 }
 func (m *mockTaskRepo) UpdateImportantTask(id string) error {
 	return nil
+}
+func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]Task, error) {
+	return []Task{}, nil
 }
 
 type mockContainerRepo struct{}

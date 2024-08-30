@@ -11,6 +11,7 @@ const dbTimeout = time.Second * 5
 
 type TaskRepository interface {
 	GetAllTasks() ([]*Task, error)
+	GetAllTasksByGroupId(groupId int) ([]Task, error)
 	GetTaskById(id string) (*Task, error)
 	GetTasksByContainerId(containerId string) ([]*Task, error)
 	CreateTask(taskcontainerId string, task Task) (Task, error)
@@ -126,6 +127,24 @@ func (m *TaskRepo) DoneTask(id string, isDone bool) error {
 
 func (m *TaskRepo) UpdateImportantTask(id string) error {
 	return nil
+}
+
+func (m *TaskRepo) GetAllTasksByGroupId(groupId int) ([]Task, error) {
+	rows, err := m.DB.Query(sqlGetAllTasksByGroupId, groupId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tasks := []Task{}
+	for rows.Next() {
+		task, err := scanRowsIntoTask(rows)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, *task)
+	}
+	return tasks, nil
 }
 
 func scanRowsIntoTask(rows *sql.Rows) (*Task, error) {

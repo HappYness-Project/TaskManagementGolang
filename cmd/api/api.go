@@ -40,7 +40,7 @@ func (s *ApiServer) Run() error {
 
 	userHandler := user.NewHandler(userRepo, usergroupRepo)
 	usergroupHandler := usergroup.NewHandler(usergroupRepo)
-	taskHandler := task.NewHandler(taskRepo, containerRepo)
+	taskHandler := task.NewHandler(taskRepo, containerRepo, usergroupRepo)
 	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
 
 	userHandler.RegisterRoutes(mux)
