@@ -26,7 +26,6 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	})
 	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
 	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
-
 }
 
 func (h *Handler) handleGetUserGroups(w http.ResponseWriter, r *http.Request) {

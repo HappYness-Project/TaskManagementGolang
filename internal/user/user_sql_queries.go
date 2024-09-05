@@ -11,7 +11,7 @@ const (
 	sqlGetUserByUsername = `SELECT id, username, first_name, last_name, email, is_active,created_at,updated_at, usersetting_id
 							FROM public.user
 							WHERE username = $1`
-	sqlGetUsersByGroupId = `SELECT * from public.user u
+	sqlGetUsersByGroupId = `SELECT id, username, first_name, last_name, email, is_active,created_at,updated_at, usersetting_id from public.user u
 							INNER JOIN public.usergroup_user ugu
 							ON u.id = ugu.user_id
 							WHERE ugu.usergroup_id = $1`
