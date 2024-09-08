@@ -32,6 +32,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Put("/", auth.WithJWTAuth(h.handleUpdateTask))
 		r.Delete("/{taskID}", auth.WithJWTAuth(h.handleDeleteTask))
 		r.Patch("/{taskID}/toggle-completion", auth.WithJWTAuth(h.handleDoneTask))
+		r.Patch("/{taskID}/toggle-important", auth.WithJWTAuth(h.handleImportantTask))
 	})
 	router.Get("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleGetTasksByContainerId))
 	router.Post("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleCreateTask))
@@ -162,6 +163,35 @@ func (h *Handler) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, "task is changed to Done.")
+}
+func (h *Handler) handleImportantTask(w http.ResponseWriter, r *http.Request) {
+	taskId := chi.URLParam(r, "taskID")
+	if taskId == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
+		return
+	}
+	task, _ := h.taskRepo.GetTaskById(taskId)
+	if task == nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found task"))
+		return
+	}
+
+	type ToggleBody struct {
+		IsImportant bool `json:"is_important"`
+	}
+	var toggleBody ToggleBody
+	err := json.NewDecoder(r.Body).Decode(&toggleBody)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.taskRepo.UpdateImportantTask(taskId, toggleBody.IsImportant)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during important toggle task"))
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusOK, "task important field is changed.")
 }
 
 func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request) {

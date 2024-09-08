@@ -71,7 +71,7 @@ func (m *mockTaskRepo) DeleteTask(id string) error {
 func (m *mockTaskRepo) DoneTask(id string, isDone bool) error {
 	return nil
 }
-func (m *mockTaskRepo) UpdateImportantTask(id string) error {
+func (m *mockTaskRepo) UpdateImportantTask(id string, isImportant bool) error {
 	return nil
 }
 func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]Task, error) {

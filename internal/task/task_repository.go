@@ -16,7 +16,7 @@ type TaskRepository interface {
 	GetTasksByContainerId(containerId string) ([]*Task, error)
 	CreateTask(taskcontainerId string, task Task) (Task, error)
 	UpdateTask(task Task) error
-	UpdateImportantTask(id string) error
+	UpdateImportantTask(id string, isImportant bool) error
 	DeleteTask(id string) error
 	DoneTask(id string, isDone bool) error
 }
@@ -121,11 +121,14 @@ func (m *TaskRepo) DoneTask(id string, isDone bool) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (m *TaskRepo) UpdateImportantTask(id string) error {
+func (m *TaskRepo) UpdateImportantTask(id string, isImportant bool) error {
+	_, err := m.DB.Exec(sqlUpdateTaskImportantField, isImportant, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
