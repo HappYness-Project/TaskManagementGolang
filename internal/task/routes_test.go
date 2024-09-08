@@ -77,6 +77,9 @@ func (m *mockTaskRepo) UpdateImportantTask(id string, isImportant bool) error {
 func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]Task, error) {
 	return []Task{}, nil
 }
+func (m *mockTaskRepo) GetAllTasksByGroupIdOnlyImportant(groupId int) ([]Task, error) {
+	return []Task{}, nil
+}
 
 type mockContainerRepo struct{}
 

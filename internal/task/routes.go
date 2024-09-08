@@ -210,16 +210,23 @@ func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("usergroup cannot be found"))
 		return
 	}
-	tasks, err := h.taskRepo.GetAllTasksByGroupId(usergroup.GroupId)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks"))
-		return
-	}
+	var tasks []Task
+
 	if r.URL.Query().Get("important") == "true" {
-
+		tasks, err = h.taskRepo.GetAllTasksByGroupIdOnlyImportant(usergroup.GroupId)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting important tasks"))
+			return
+		}
 	} else if r.URL.Query().Get("important") == "false" {
-
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks - not implemented for false case"))
+		return
+	} else {
+		tasks, err = h.taskRepo.GetAllTasksByGroupId(usergroup.GroupId)
+		if err != nil {
+			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks"))
+			return
+		}
 	}
-
 	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }
