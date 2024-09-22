@@ -23,9 +23,11 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/user-groups", func(r chi.Router) {
 		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
+		r.Post("/{groupID}/users", auth.WithJWTAuth(h.handleAddUserToGroup))
 	})
 	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
 	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
+
 }
 
 func (h *Handler) handleGetUserGroups(w http.ResponseWriter, r *http.Request) {
@@ -122,4 +124,35 @@ func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, groups)
+}
+
+func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "groupID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		return
+	}
+	groupId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid group ID"))
+		return
+	}
+
+	type JsonBody struct {
+		UserId int `json:"user_id"`
+	}
+	var jsonBody JsonBody
+	err = json.NewDecoder(r.Body).Decode(&jsonBody)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.groupRepo.InsertUserGroupUserTable(groupId, jsonBody.UserId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to add user to the user group"))
+		return
+	}
+
+	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is added to the user group ID: %d", groupId))
 }
