@@ -28,7 +28,12 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }
 
+type contextKey string
+
+const userIDKey contextKey = "userID"
+
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
+
 	if r.URL.Query().Get("email") != "" {
 		h.responseUserUsingEmail(w, "email", r.URL.Query().Get("email"))
 		return

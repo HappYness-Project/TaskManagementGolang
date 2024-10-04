@@ -25,7 +25,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
 		r.Post("/{groupID}/users", auth.WithJWTAuth(h.handleAddUserToGroup))
 	})
-	router.Post("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
+	router.Post("/api/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
 	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
 
 }
@@ -59,16 +59,7 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "userID")
-	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
-		return
-	}
-	userId, err := strconv.Atoi(vars)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
-		return
-	}
+	userID := auth.GetUserIDFromContext(r.Context())
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -96,8 +87,7 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
-	err = h.groupRepo.InsertUserGroupUserTable(groupId, userId)
+	err = h.groupRepo.InsertUserGroupUserTable(groupId, userID)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

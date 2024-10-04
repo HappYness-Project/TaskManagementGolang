@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
@@ -33,9 +34,9 @@ func WithJWTAuth(handlerFunc http.HandlerFunc) http.HandlerFunc {
 		}
 
 		claims := token.Claims.(jwt.MapClaims)
-		email := claims["email"]
+		userId, _ := strconv.Atoi(claims["nameid"].(string))
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, UserKey, email)
+		ctx = context.WithValue(ctx, UserKey, userId)
 		r = r.WithContext(ctx)
 		handlerFunc(w, r)
 	}
