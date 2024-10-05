@@ -24,6 +24,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
 		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
 		r.Post("/{groupID}/users", auth.WithJWTAuth(h.handleAddUserToGroup))
+		r.Put("/{groupID}/users/{userID}", auth.WithJWTAuth(h.handleRemoveUserFromGroup))
 	})
 	router.Post("/api/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
 	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
@@ -145,4 +146,34 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is added to the user group ID: %d", groupId))
+}
+
+func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Request) {
+	vars := chi.URLParam(r, "groupID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		return
+	}
+	groupId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		return
+	}
+	vars = chi.URLParam(r, "userID")
+	if vars == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing User ID"))
+		return
+	}
+	userId, err := strconv.Atoi(vars)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid User ID"))
+		return
+	}
+
+	err = h.groupRepo.RemoveUserFromUserGroup(groupId, userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to remove user to the user group"))
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is removed from user group ID: %d", groupId))
 }

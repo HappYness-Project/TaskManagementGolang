@@ -12,5 +12,6 @@ const (
 	sqlCreateUserGroup = `INSERT INTO public.usergroup(name, description, type, thumbnailurl, is_active)
 							VALUES ($1, $2, $3, $4, $5) RETURNING id;`
 
-	sqlCreateUserGroupForJoinTable = `INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES ($1, $2)`
+	sqlAddUserToUserGroup      = `INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES ($1, $2)`
+	sqlRemoveUserFromUserGroup = `DELETE FROM public.usergroup_user WHERE usergroup_id = $1 AND user_id = $2`
 )

@@ -15,6 +15,7 @@ type UserGroupRepository interface {
 	GetUserGroupsByUserId(userId int) ([]*UserGroup, error)
 	CreateGroup(ug UserGroup) (int, error)
 	InsertUserGroupUserTable(groupId int, userId int) error
+	RemoveUserFromUserGroup(groupId int, userId int) error
 }
 type UserGroupRepo struct {
 	DB *sql.DB
@@ -94,9 +95,17 @@ func (m *UserGroupRepo) CreateGroup(ug UserGroup) (int, error) {
 	return lastInsertedId, nil
 }
 func (m *UserGroupRepo) InsertUserGroupUserTable(groupId int, userId int) error {
-	_, err := m.DB.Exec(sqlCreateUserGroupForJoinTable, groupId, userId)
+	_, err := m.DB.Exec(sqlAddUserToUserGroup, groupId, userId)
 	if err != nil {
 		return fmt.Errorf("unable to insert into usergroup_user table : %w", err)
+	}
+	return nil
+}
+
+func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
+	_, err := m.DB.Exec(sqlRemoveUserFromUserGroup, groupId, userId)
+	if err != nil {
+		return fmt.Errorf("unable to delete user from usergroup_user table : %w", err)
 	}
 	return nil
 }
