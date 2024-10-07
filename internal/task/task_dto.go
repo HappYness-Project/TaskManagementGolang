@@ -11,7 +11,6 @@ type CreateTaskDto struct {
 }
 
 type UpdateTaskDto struct {
-	TaskId     string    `json:"id"`
 	TaskName   string    `json:"name"`
 	TaskDesc   string    `json:"description"`
 	TargetDate time.Time `json:"target_date"`

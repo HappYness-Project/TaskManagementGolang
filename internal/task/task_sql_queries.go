@@ -22,6 +22,7 @@ const (
 	sqlCreateTaskForJoinTable   = `INSERT INTO public.taskcontainer_task(taskcontainer_id, task_id) VALUES ($1, $2)`
 	sqlDeleteTaskForJoinTable   = `DELETE FROM public.taskcontainer_task WHERE task_id=$1`
 	sqlDeleteTask               = `DELETE FROM public.task WHERE id=$1`
+	sqlUpdateTask               = `UPDATE public.task SET name=$2, description=$3, updated_at=$4, target_date=$5, priority=$6, category=$7 WHERE id=$1`
 	sqlUpdateTaskDoneField      = `UPDATE public.task SET is_completed=$1 WHERE id = $2;`
 	sqlUpdateTaskImportantField = `UPDATE public.task SET is_important=$1 WHERE id = $2;`
 )

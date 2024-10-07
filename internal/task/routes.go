@@ -29,7 +29,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
 		r.Get("/", h.handleGetTasks)
 		r.Get("/{taskID}", auth.WithJWTAuth(h.handleGetTask))
-		r.Put("/", auth.WithJWTAuth(h.handleUpdateTask))
+		r.Put("/{taskID}", auth.WithJWTAuth(h.handleUpdateTask))
 		r.Delete("/{taskID}", auth.WithJWTAuth(h.handleDeleteTask))
 		r.Patch("/{taskID}/toggle-completion", auth.WithJWTAuth(h.handleDoneTask))
 		r.Patch("/{taskID}/toggle-important", auth.WithJWTAuth(h.handleImportantTask))
@@ -119,6 +119,43 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
+	taskId := chi.URLParam(r, "taskID")
+	if taskId == "" {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var updateDto *UpdateTaskDto
+	err = json.Unmarshal(body, &updateDto)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	task, err := h.taskRepo.GetTaskById(taskId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find task"))
+		return
+	}
+
+	task.TaskName = updateDto.TaskName
+	task.TaskDesc = updateDto.TaskDesc
+	task.TargetDate = updateDto.TargetDate
+	task.Priority = updateDto.Priority
+	task.Category = updateDto.Category
+	err = h.taskRepo.UpdateTask(*task)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not able to update task"))
+		return
+	}
+
 }
 
 func (h *Handler) handleDeleteTask(w http.ResponseWriter, r *http.Request) {

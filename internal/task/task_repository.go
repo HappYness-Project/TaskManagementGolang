@@ -102,6 +102,10 @@ func (m *TaskRepo) CreateTask(containerId string, task Task) (Task, error) {
 }
 
 func (m *TaskRepo) UpdateTask(task Task) error {
+	_, err := m.DB.Exec(sqlUpdateTask, task.TaskId, task.TaskName, task.TaskDesc, task.UpdatedAt, task.TargetDate, task.Priority, task.Category)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
