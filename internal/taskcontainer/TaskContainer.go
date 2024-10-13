@@ -1,9 +1,11 @@
 package taskcontainer
 
 type TaskContainer struct {
-	ContainerId   string `json:"id"`
-	ContainerName string `json:"name"`
-	ContainerDesc string `json:"description"`
-	IsActive      bool   `json:"is_active"`
-	UsergroupId   int    `json:"usergroup_id"`
+	Id             string `json:"id"`
+	Name           string `json:"name"`
+	Description    string `json:"description"`
+	Type           string `json:"type"`
+	IsActive       bool   `json:"is_active"`
+	activity_level int    `json:"activity_level"`
+	UsergroupId    int    `json:"usergroup_id"`
 }

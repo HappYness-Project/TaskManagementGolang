@@ -3,6 +3,7 @@ package taskcontainer
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -12,6 +13,7 @@ type ContainerRepository interface {
 	AllTaskContainers() ([]*TaskContainer, error)
 	GetById(id string) (*TaskContainer, error)
 	GetContainersByGroupId(groupId int) ([]TaskContainer, error)
+	CreateContainer(container TaskContainer) error
 }
 
 type ContainerRepo struct {
@@ -84,12 +86,20 @@ func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, er
 	return containers, nil
 }
 
+func (m *ContainerRepo) CreateContainer(c TaskContainer) error {
+	_, err := m.DB.Exec(sqlCreateContainer, c.Id, c.Name, c.Description, c.IsActive, c.activity_level, c.Type, c.UsergroupId)
+	if err != nil {
+		return fmt.Errorf("unable to insert into task table : %w", err)
+	}
+	return nil
+}
+
 func scanRowsIntoContainer(rows *sql.Rows) (*TaskContainer, error) {
 	container := new(TaskContainer)
 	err := rows.Scan(
-		&container.ContainerId,
-		&container.ContainerName,
-		&container.ContainerDesc,
+		&container.Id,
+		&container.Name,
+		&container.Description,
 		&container.IsActive,
 		&container.UsergroupId,
 	)

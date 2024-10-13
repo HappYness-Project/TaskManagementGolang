@@ -110,7 +110,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		Priority:   createDto.Priority,
 		Category:   createDto.Category,
 	}
-	uuid, err := h.taskRepo.CreateTask(container.ContainerId, task)
+	uuid, err := h.taskRepo.CreateTask(container.Id, task)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

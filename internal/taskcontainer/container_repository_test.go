@@ -48,10 +48,10 @@ func TestContainerRepo_ContainerById(t *testing.T) {
 		mockContainer := mockContainerObj()
 		rows := mockContainerRows(mockContainer)
 		mock.ExpectQuery(sqlGetById).
-			WithArgs(mockContainer.ContainerId).
+			WithArgs(mockContainer.Id).
 			WillReturnRows(rows)
 
-		container, err := containerRepo.GetById(mockContainer.ContainerId)
+		container, err := containerRepo.GetById(mockContainer.Id)
 
 		require.Nil(t, err)
 		require.Equal(t, &mockContainer, container)
@@ -100,14 +100,14 @@ func TestContainerRepo_GetContainersByGroupId(t *testing.T) {
 
 func mockContainerObj() TaskContainer {
 	return TaskContainer{
-		ContainerId:   uuid.NewString(),
-		ContainerName: "testuser",
-		ContainerDesc: "testdesc",
-		IsActive:      true,
-		UsergroupId:   1,
+		Id:          uuid.New().String(),
+		Name:        "testuser",
+		Description: "testdesc",
+		IsActive:    true,
+		UsergroupId: 1,
 	}
 }
 func mockContainerRows(c TaskContainer) *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "name", "description", "is_active", "usergroup_id"}).
-		AddRow(c.ContainerId, c.ContainerName, c.ContainerDesc, c.IsActive, c.UsergroupId)
+		AddRow(c.Id, c.Name, c.Description, c.IsActive, c.UsergroupId)
 }

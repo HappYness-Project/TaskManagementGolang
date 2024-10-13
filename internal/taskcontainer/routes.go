@@ -3,10 +3,12 @@ package taskcontainer
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
 	"github.com/happYness-Project/taskManagementGolang/utils"
@@ -22,7 +24,7 @@ func NewHandler(repo ContainerRepository, userRepo user.UserRepository) *Handler
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/task-containers", func(r chi.Router) {
-		// TODO Jwt Middleware setup in here, maybe more higher level if possible.
+		r.Post("/", auth.WithJWTAuth(h.handleCreateTaskContainer))
 		r.Get("/", auth.WithJWTAuth(h.handleGetTaskContainers))
 		r.Get("/{containerID}", auth.WithJWTAuth(h.handleGetTaskContainerById))
 	})
@@ -71,4 +73,32 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 	}
 	containersJson, _ := json.Marshal(containers)
 	utils.WriteJSON(w, http.StatusOK, containersJson)
+}
+
+func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var createDto *CreateContainerDto
+	err = json.Unmarshal(body, &createDto)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	container := TaskContainer{
+		Id:             uuid.New().String(),
+		Name:           createDto.Name,
+		Description:    createDto.Description,
+		Type:           createDto.Type,
+		IsActive:       true,
+		activity_level: 0,
+		UsergroupId:    createDto.UserGroupId,
+	}
+	_ = h.containerRepo.CreateContainer(container)
+	utils.WriteJsonWithEncode(w, http.StatusCreated, container.Id)
 }
