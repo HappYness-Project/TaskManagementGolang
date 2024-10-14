@@ -10,11 +10,11 @@ import (
 const dbTimeout = time.Second * 5
 
 type TaskRepository interface {
-	GetAllTasks() ([]*Task, error)
+	GetAllTasks() ([]Task, error)
 	GetAllTasksByGroupId(groupId int) ([]Task, error)
 	GetAllTasksByGroupIdOnlyImportant(groupId int) ([]Task, error)
 	GetTaskById(id string) (*Task, error)
-	GetTasksByContainerId(containerId string) ([]*Task, error)
+	GetTasksByContainerId(containerId string) ([]Task, error)
 	CreateTask(taskcontainerId string, task Task) (Task, error)
 	UpdateTask(task Task) error
 	UpdateImportantTask(id string, isImportant bool) error
@@ -31,7 +31,7 @@ func NewTaskRepository(db *sql.DB) *TaskRepo {
 	}
 }
 
-func (m *TaskRepo) GetAllTasks() ([]*Task, error) {
+func (m *TaskRepo) GetAllTasks() ([]Task, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -40,13 +40,13 @@ func (m *TaskRepo) GetAllTasks() ([]*Task, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var tasks []*Task
+	var tasks []Task
 	for rows.Next() {
 		task, err := scanRowsIntoTask(rows)
 		if err != nil {
 			return nil, err
 		}
-		tasks = append(tasks, task)
+		tasks = append(tasks, *task)
 	}
 	return tasks, nil
 }
@@ -68,20 +68,20 @@ func (m *TaskRepo) GetTaskById(id string) (*Task, error) {
 	return task, nil
 }
 
-func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]*Task, error) {
+func (m *TaskRepo) GetTasksByContainerId(containerId string) ([]Task, error) {
 	rows, err := m.DB.Query(sqlGetAllTasksByContainerId, containerId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	tasks := []*Task{}
+	tasks := []Task{}
 	for rows.Next() {
 		task, err := scanRowsIntoTask(rows)
 		if err != nil {
 			return nil, err
 		}
-		tasks = append(tasks, task)
+		tasks = append(tasks, *task)
 	}
 	return tasks, nil
 }

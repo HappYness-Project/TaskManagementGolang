@@ -29,6 +29,7 @@ func NewApiServer(addr string, db *sql.DB) *ApiServer {
 func (s *ApiServer) Run() error {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Recoverer)
+	// mux.Use(enableCORS)
 	// logging by doing mux.Use(middleware.Logger)
 
 	mux.Get("/", home)

@@ -27,7 +27,7 @@ func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository, u
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
-		r.Get("/", h.handleGetTasks)
+		r.Get("/", auth.WithJWTAuth(h.handleGetTasks))
 		r.Get("/{taskID}", auth.WithJWTAuth(h.handleGetTask))
 		r.Put("/{taskID}", auth.WithJWTAuth(h.handleUpdateTask))
 		r.Delete("/{taskID}", auth.WithJWTAuth(h.handleDeleteTask))
@@ -86,16 +86,8 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container"))
 		return
 	}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	var createDto *CreateTaskDto
-	err = json.Unmarshal(body, &createDto)
-	if err != nil {
+	var createDto CreateTaskDto
+	if err := utils.ParseJSON(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
