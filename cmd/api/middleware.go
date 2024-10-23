@@ -15,3 +15,6 @@ func enableCORS(h http.Handler) http.Handler {
 		}
 	})
 }
+
+//TODO Logging middleware ??
+//TODO JWT Handling Middleware ??

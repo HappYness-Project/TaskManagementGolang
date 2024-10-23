@@ -27,10 +27,7 @@ func TestTaskHandler(t *testing.T) {
 
 		mux.Get("/api/tasks", handler.handleGetTasks)
 		mux.ServeHTTP(rr, req)
-		if rr.Code != http.StatusOK {
-			t.Errorf("expected status code %d, got %d", http.StatusOK, rr.Code)
-		}
-
+		assertStatus(t, rr.Code, http.StatusOK)
 		var tasks []Task
 		err := json.Unmarshal(rr.Body.Bytes(), &tasks)
 		require.NoError(t, err)
@@ -47,9 +44,17 @@ func TestTaskHandler(t *testing.T) {
 
 		mux.Get("/api/tasks/{taskID}", handler.handleGetTask)
 		mux.ServeHTTP(rr, req)
-		if rr.Code != http.StatusOK {
-			t.Errorf("expected status code %d, got %d", http.StatusOK, rr.Code)
-		}
+		assertStatus(t, rr.Code, http.StatusOK)
+	})
+	t.Run("given missing container Id, when handleGetTasksByContainerId called, Then bad request", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodGet, "/api/task-containers//tasks", nil)
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Get("/api/task-containers/{containerID}/tasks", handler.handleGetTasksByContainerId)
+		mux.ServeHTTP(rr, req)
+
+		assertStatus(t, rr.Code, http.StatusBadRequest)
 	})
 	t.Run("when create new task, then return status code 201", func(t *testing.T) {
 		newTask := CreateTaskDto{
@@ -60,21 +65,16 @@ func TestTaskHandler(t *testing.T) {
 			Category:   "programming",
 		}
 		marshalled, _ := json.Marshal(newTask)
-		req, err := http.NewRequest(http.MethodPost, "/api/task-containers/5951f639-c8ce-4462-8b72-c57458c448fd/tasks", bytes.NewBuffer(marshalled))
-		if err != nil {
-			t.Fatal(err)
-		}
-
+		req, _ := http.NewRequest(http.MethodPost, "/api/task-containers/5951f639-c8ce-4462-8b72-c57458c448fd/tasks", bytes.NewBuffer(marshalled))
 		rr := httptest.NewRecorder()
 		mux := chi.NewRouter()
 
 		mux.Post("/api/task-containers/{containerID}/tasks", handler.handleCreateTask)
 		mux.ServeHTTP(rr, req)
-		if rr.Code != http.StatusCreated {
-			t.Errorf("expected status code %d, got %d", http.StatusCreated, rr.Code)
-		}
+
+		assertStatus(t, rr.Code, http.StatusCreated)
 	})
-	t.Run("when payload is missing, then bad request", func(t *testing.T) {
+	t.Run("given payload is missing, when creating new task, then bad request", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, "/api/task-containers/5951f639-c8ce-4462-8b72-c57458c448fd/tasks", nil)
 		if err != nil {
 			t.Fatal(err)
@@ -85,9 +85,70 @@ func TestTaskHandler(t *testing.T) {
 
 		mux.Post("/api/task-containers/{containerID}/tasks", handler.handleCreateTask)
 		mux.ServeHTTP(rr, req)
-		if rr.Code != http.StatusBadRequest {
-			t.Errorf("expected status code %d, got %d", http.StatusCreated, rr.Code)
+		assertStatus(t, rr.Code, http.StatusBadRequest)
+	})
+	t.Run("given valid payload, when updating existing task, then success", func(t *testing.T) {
+		updateTask := UpdateTaskDto{
+			TaskName:   "New task",
+			TaskDesc:   "desc",
+			TargetDate: time.Now().AddDate(0, 0, 7*1),
+			Priority:   "normal",
+			Category:   "programming",
 		}
+		marshalled, _ := json.Marshal(updateTask)
+		req, _ := http.NewRequest(http.MethodPut, "/api/tasks/5951f639-c8ce-4462-8b72-c57458c448fd", bytes.NewBuffer(marshalled))
+
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Put("/api/tasks/{taskID}", handler.handleUpdateTask)
+		mux.ServeHTTP(rr, req)
+		assertStatus(t, rr.Code, http.StatusOK)
+	})
+	t.Run("given payload is missing, when updating existing task, then bad request", func(t *testing.T) {
+		req, err := http.NewRequest(http.MethodPut, "/api/tasks/5951f639-c8ce-4462-8b72-c57458c448fd", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Put("/api/tasks/{taskID}", handler.handleUpdateTask)
+		mux.ServeHTTP(rr, req)
+		assertStatus(t, rr.Code, http.StatusBadRequest)
+	})
+	t.Run("given empty ID, when delete task, then not found", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodDelete, "/api/tasks/", nil)
+
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Delete("/api/tasks/{taskID}", handler.handleDeleteTask)
+		mux.ServeHTTP(rr, req)
+		assertStatus(t, rr.Code, http.StatusNotFound)
+	})
+	t.Run("given empty taskID format, when togglecompletion, then bad request", func(t *testing.T) {
+		var jsonStr = []byte(`{"is_completed":true }`)
+		req, _ := http.NewRequest(http.MethodPatch, "/api/tasks//toggle-completion", bytes.NewBuffer(jsonStr))
+
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Patch("/api/tasks/{taskID}/toggle-completion", handler.handleDoneTask)
+		mux.ServeHTTP(rr, req)
+		assertStatus(t, rr.Code, http.StatusBadRequest)
+	})
+	t.Run("given identifier with body, when togglecompletion, then success", func(t *testing.T) {
+		var jsonStr = []byte(`{"is_completed":true }`)
+		req, _ := http.NewRequest(http.MethodPatch, "/api/tasks/5951f639-c8ce-4462-8b72-c57458c448fd/toggle-completion", bytes.NewBuffer(jsonStr))
+		rr := httptest.NewRecorder()
+		mux := chi.NewRouter()
+
+		mux.Patch("/api/tasks/{taskID}/toggle-completion", handler.handleDoneTask)
+		mux.ServeHTTP(rr, req)
+
+		assertStatus(t, rr.Code, http.StatusOK)
 	})
 }
 
@@ -142,4 +203,10 @@ func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]taskcontainer
 }
 func (m *mockContainerRepo) CreateContainer(container taskcontainer.TaskContainer) error {
 	return nil
+}
+func assertStatus(t testing.TB, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("expected status code %d, got %d", got, want)
+	}
 }

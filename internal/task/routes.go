@@ -3,7 +3,6 @@ package task
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -47,13 +46,8 @@ func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }
 func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
-	taskId := chi.URLParam(r, "taskID")
-	if taskId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
-		return
-	}
 	// TODO Requirement - check if container ID is UUID format.
-	task, err := h.taskRepo.GetTaskById(taskId)
+	task, err := h.taskRepo.GetTaskById(chi.URLParam(r, "taskID"))
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("task does not exist"))
 		return
@@ -76,12 +70,7 @@ func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Req
 }
 
 func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
-	containerId := chi.URLParam(r, "containerID")
-	if containerId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
-		return
-	}
-	container, err := h.containerRepo.GetById(containerId)
+	container, err := h.containerRepo.GetById(chi.URLParam(r, "containerID"))
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container"))
 		return
@@ -112,25 +101,11 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 	taskId := chi.URLParam(r, "taskID")
-	if taskId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
-		return
-	}
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	var updateDto *UpdateTaskDto
-	err = json.Unmarshal(body, &updateDto)
-	if err != nil {
+	var updateDto UpdateTaskDto
+	if err := utils.ParseJSON(r, &updateDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
 	task, err := h.taskRepo.GetTaskById(taskId)
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find task"))
@@ -151,12 +126,7 @@ func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
-	taskId := chi.URLParam(r, "taskID")
-	if taskId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
-		return
-	}
-	err := h.taskRepo.DeleteTask(taskId)
+	err := h.taskRepo.DeleteTask(chi.URLParam(r, "taskID"))
 	if err != nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during deleting a task"))
 		return

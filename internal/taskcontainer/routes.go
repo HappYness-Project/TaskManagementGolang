@@ -3,7 +3,6 @@ package taskcontainer
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 
@@ -76,20 +75,12 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 }
 
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	var createDto *CreateContainerDto
-	err = json.Unmarshal(body, &createDto)
-	if err != nil {
+	var createDto CreateContainerDto
+	if err := utils.ParseJSON(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+
 	container := TaskContainer{
 		Id:             uuid.New().String(),
 		Name:           createDto.Name,
