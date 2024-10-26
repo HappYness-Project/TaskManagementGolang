@@ -26,9 +26,9 @@ type Env struct {
 
 var AccessToken string // updated from the main package.
 
-func InitConfig() Env {
+func InitConfig(envString string) Env {
 	env := Env{}
-	viper.SetConfigFile("development.env")
+	viper.SetConfigFile(envString)
 
 	err := viper.ReadInConfig()
 	if err != nil {

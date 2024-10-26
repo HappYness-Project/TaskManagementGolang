@@ -26,8 +26,9 @@ func NewApiServer(addr string, db *sql.DB) *ApiServer {
 	}
 }
 
-func (s *ApiServer) Run() error {
+func (s *ApiServer) Setup() *chi.Mux {
 	mux := chi.NewRouter()
+	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	// mux.Use(enableCORS)
 	// logging by doing mux.Use(middleware.Logger)
@@ -49,9 +50,14 @@ func (s *ApiServer) Run() error {
 	taskHandler.RegisterRoutes(mux)
 	containerHandler.RegisterRoutes(mux)
 
+	return mux
+}
+
+func (s *ApiServer) Run(mux *chi.Mux) error {
 	log.Println("Listening on ", s.addr)
 	return http.ListenAndServe(s.addr, mux)
 }
+
 func home(w http.ResponseWriter, r *http.Request) {
 
 	var payload = struct {
