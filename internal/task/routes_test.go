@@ -204,6 +204,9 @@ func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]taskcontainer
 func (m *mockContainerRepo) CreateContainer(container taskcontainer.TaskContainer) error {
 	return nil
 }
+func (m *mockContainerRepo) DeleteContainer(id string) error {
+	return nil
+}
 func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {

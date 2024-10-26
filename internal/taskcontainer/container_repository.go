@@ -14,6 +14,7 @@ type ContainerRepository interface {
 	GetById(id string) (*TaskContainer, error)
 	GetContainersByGroupId(groupId int) ([]TaskContainer, error)
 	CreateContainer(container TaskContainer) error
+	DeleteContainer(id string) error
 }
 
 type ContainerRepo struct {
@@ -89,7 +90,15 @@ func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, er
 func (m *ContainerRepo) CreateContainer(c TaskContainer) error {
 	_, err := m.DB.Exec(sqlCreateContainer, c.Id, c.Name, c.Description, c.IsActive, c.activity_level, c.Type, c.UsergroupId)
 	if err != nil {
-		return fmt.Errorf("unable to insert into task table : %w", err)
+		return fmt.Errorf("unable to insert into taskcontainer table : %w", err)
+	}
+	return nil
+}
+
+func (m *ContainerRepo) DeleteContainer(id string) error {
+	_, err := m.DB.Exec(sqlDeleteContainer, id)
+	if err != nil {
+		return fmt.Errorf("unable to remove task container : %w", err)
 	}
 	return nil
 }

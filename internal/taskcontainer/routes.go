@@ -26,6 +26,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Post("/", auth.WithJWTAuth(h.handleCreateTaskContainer))
 		r.Get("/", auth.WithJWTAuth(h.handleGetTaskContainers))
 		r.Get("/{containerID}", auth.WithJWTAuth(h.handleGetTaskContainerById))
+		r.Delete("/{containerID}", auth.WithJWTAuth(h.handleDeleteTaskContainer))
 	})
 	router.Get("/api/user-groups/{usergroupID}/task-containers", auth.WithJWTAuth(h.handleGetTaskContainersByGroupId))
 }
@@ -92,4 +93,14 @@ func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Reque
 	}
 	_ = h.containerRepo.CreateContainer(container)
 	utils.WriteJsonWithEncode(w, http.StatusCreated, container.Id)
+}
+
+func (h *Handler) handleDeleteTaskContainer(w http.ResponseWriter, r *http.Request) {
+	containerId := chi.URLParam(r, "containerID")
+	err := h.containerRepo.DeleteContainer(containerId)
+	if err != nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("container does not exist"))
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusNoContent, "task container is removed.")
 }
