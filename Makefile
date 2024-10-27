@@ -1,3 +1,13 @@
+ifeq (,$(wildcard ./.env))
+$(error .env file not found)
+else
+include .env
+export $(shell sed 's/=.*//' .env)
+endif
+
+
+
+
 start:
 	@echo "Starting app..."
 	@docker-compose up --build -d
@@ -12,3 +22,4 @@ watch: start
 
 logs:
 	@docker-compose logs -f
+

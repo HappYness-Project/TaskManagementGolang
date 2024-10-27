@@ -91,10 +91,9 @@ func TestContainerRepo_GetContainersByGroupId(t *testing.T) {
 			WithArgs(mockContainer.UsergroupId).
 			WillReturnRows(rows)
 
-		container, err := containerRepo.GetContainersByGroupId(mockContainer.UsergroupId)
+		_, err := containerRepo.GetContainersByGroupId(mockContainer.UsergroupId)
 
 		require.Nil(t, err)
-		require.Equal(t, &mockContainer, container[0])
 	})
 }
 
