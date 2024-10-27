@@ -29,6 +29,10 @@ func runTestServer() *httptest.Server {
 }
 
 func TestIntegrationTestHomePage(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
 	ts := runTestServer()
 	defer ts.Close()
 
