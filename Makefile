@@ -6,7 +6,10 @@ export $(shell sed 's/=.*//' .env)
 endif
 
 
+VERSION ?= $(shell git rev-parse --short HEAD)
 
+version:
+	@echo $(VERSION)
 
 start:
 	@echo "Starting app..."
@@ -23,3 +26,8 @@ watch: start
 logs:
 	@docker-compose logs -f
 
+build:
+	go build -v ./...
+
+test:
+	go test -v ./... -short

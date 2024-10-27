@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	env := configs.InitConfig("development.env")
+	env := configs.InitConfig(".env")
 	configs.AccessToken = env.AccessTokenSecret
 	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)

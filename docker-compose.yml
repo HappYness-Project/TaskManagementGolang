@@ -30,7 +30,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - development.env
+      - .env
     environment:
       DB_USER: postgres
       DB_PASSWORD: postgres

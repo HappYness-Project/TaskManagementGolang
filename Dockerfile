@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.22.5 AS build-stage
+FROM golang:1.23.2 AS build-stage
   WORKDIR /app
 
   COPY go.mod go.sum ./
@@ -14,7 +14,7 @@ FROM scratch AS build-release-stage
   WORKDIR /
 
   COPY --from=build-stage /api /api
-  COPY development.env .
+  COPY .env .
 
   EXPOSE 8080
 
