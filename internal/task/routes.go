@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/utils"
@@ -26,16 +25,16 @@ func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository, u
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
-		r.Get("/", auth.WithJWTAuth(h.handleGetTasks))
-		r.Get("/{taskID}", auth.WithJWTAuth(h.handleGetTask))
-		r.Put("/{taskID}", auth.WithJWTAuth(h.handleUpdateTask))
-		r.Delete("/{taskID}", auth.WithJWTAuth(h.handleDeleteTask))
-		r.Patch("/{taskID}/toggle-completion", auth.WithJWTAuth(h.handleDoneTask))
-		r.Patch("/{taskID}/toggle-important", auth.WithJWTAuth(h.handleImportantTask))
+		r.Get("/", h.handleGetTasks)
+		r.Get("/{taskID}", h.handleGetTask)
+		r.Put("/{taskID}", h.handleUpdateTask)
+		r.Delete("/{taskID}", h.handleDeleteTask)
+		r.Patch("/{taskID}/toggle-completion", h.handleDoneTask)
+		r.Patch("/{taskID}/toggle-important", h.handleImportantTask)
 	})
-	router.Get("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleGetTasksByContainerId))
-	router.Post("/api/task-containers/{containerID}/tasks", auth.WithJWTAuth(h.handleCreateTask))
-	router.Get("/api/user-groups/{usergroupID}/tasks", auth.WithJWTAuth(h.handleGetTasksByGroupId))
+	router.Get("/api/task-containers/{containerID}/tasks", h.handleGetTasksByContainerId)
+	router.Post("/api/task-containers/{containerID}/tasks", h.handleCreateTask)
+	router.Get("/api/user-groups/{usergroupID}/tasks", h.handleGetTasksByGroupId)
 }
 func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.taskRepo.GetAllTasks()

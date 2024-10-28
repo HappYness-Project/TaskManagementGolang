@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth"
+	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
 	"github.com/happYness-Project/taskManagementGolang/internal/task"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
@@ -15,14 +17,18 @@ import (
 )
 
 type ApiServer struct {
-	addr string
-	db   *sql.DB
+	addr      string
+	db        *sql.DB
+	tokenAuth *jwtauth.JWTAuth
 }
 
 func NewApiServer(addr string, db *sql.DB) *ApiServer {
+	tokenAuth := jwtauth.New("HS256", []byte(configs.AccessToken), nil)
+
 	return &ApiServer{
-		addr: addr,
-		db:   db,
+		addr:      addr,
+		db:        db,
+		tokenAuth: tokenAuth,
 	}
 }
 
@@ -30,8 +36,9 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	// mux.Use(enableCORS)
-	// logging by doing mux.Use(middleware.Logger)
+	// Apply JWT verification and authentication to all routes
+	mux.Use(jwtauth.Verifier(s.tokenAuth))
+	mux.Use(jwtauth.Authenticator)
 	mux.Get("/", home)
 
 	userRepo := user.NewUserRepository(s.db)
@@ -58,7 +65,6 @@ func (s *ApiServer) Run(mux *chi.Mux) error {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-
 	var payload = struct {
 		Status  string `json:"status"`
 		Message string `json:"message"`
