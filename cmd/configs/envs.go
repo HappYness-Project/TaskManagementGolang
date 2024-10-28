@@ -2,6 +2,7 @@ package configs
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -27,9 +28,13 @@ type Env struct {
 var AccessToken string // updated from the main package.
 
 func InitConfig(envString string) Env {
+	workingdir, _ := os.Getwd()
+	if envString == "" {
+		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
+	} else if envString == "development" {
+		viper.SetConfigFile("local.env")
+	}
 	env := Env{}
-	viper.SetConfigFile(envString)
-
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal("Can't find the environment file : ", err)

@@ -32,7 +32,6 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(middleware.Recoverer)
 	// mux.Use(enableCORS)
 	// logging by doing mux.Use(middleware.Logger)
-
 	mux.Get("/", home)
 
 	userRepo := user.NewUserRepository(s.db)

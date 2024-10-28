@@ -22,7 +22,7 @@ services:
 
   api:
     build:
-      context: .
+      context: ./
       dockerfile: Dockerfile
     restart: always
     volumes:
@@ -30,7 +30,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - dev-env/local.env
     environment:
       DB_USER: postgres
       DB_PASSWORD: postgres
