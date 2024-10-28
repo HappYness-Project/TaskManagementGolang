@@ -2,7 +2,6 @@
 
 FROM golang:1.23.2 AS build-stage
   WORKDIR /app
-
   COPY go.mod go.sum ./
   RUN go mod download
 
@@ -14,7 +13,7 @@ FROM scratch AS build-release-stage
   WORKDIR /
 
   COPY --from=build-stage /api /api
-  COPY .env .
+  COPY dev-env/local.env .
 
   EXPOSE 8080
 

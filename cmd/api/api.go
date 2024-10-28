@@ -36,11 +36,9 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-
 	// Apply JWT verification and authentication to all routes
 	mux.Use(jwtauth.Verifier(s.tokenAuth))
 	mux.Use(jwtauth.Authenticator)
-
 	mux.Get("/", home)
 
 	userRepo := user.NewUserRepository(s.db)
