@@ -23,7 +23,7 @@ type ApiServer struct {
 }
 
 func NewApiServer(addr string, db *sql.DB) *ApiServer {
-	tokenAuth := jwtauth.New("HS256", []byte(configs.AccessToken), nil)
+	tokenAuth := jwtauth.New("HS512", []byte(configs.AccessToken), nil)
 
 	return &ApiServer{
 		addr:      addr,
