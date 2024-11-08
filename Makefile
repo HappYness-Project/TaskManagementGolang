@@ -13,30 +13,27 @@ version:
 
 start:
 	@echo "Starting app..."
-	@docker-compose up --build -d
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
-env-down:
-	@docker-compose down
+down:
+	@echo "Stopping app..."
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
 
 
 build:
 	go build -v ./...
 
 rebuild-docker:
-	@docker-compose -f down
-	@docker-compose -f build --no-cache
-	@docker-compose -f up -d
-
-stop:
-	@echo "Stopping app..."
-	@docker-compose down
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) build --no-cache
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) up -d
 
 watch: start
 	@echo "Watching for file changes..."
 	@docker-compose watch
 
 logs:
-	@docker-compose -f logs -f
+	@docker-compose -f $(DOCKER_COMPOSE_FILE) logs -f
 
 test:
 	go test -v ./... -short

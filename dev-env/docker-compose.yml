@@ -11,7 +11,7 @@ services:
       - "8010:5432"  # Map port 5432 on the host to port 5432 on the container
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
-      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      - ./../sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]  # Check if PostgreSQL is ready
       interval: 10s
@@ -21,16 +21,17 @@ services:
       - internal
 
   api:
+    container_name: task-api
     build:
-      context: ./
-      dockerfile: Dockerfile
+      context: ./../
+      dockerfile: ./Dockerfile
     restart: always
     volumes:
       - .:/go/src/api
     ports:
       - "8080:8080"
     env_file:
-      - dev-env/local.env
+      - ./local.env
     environment:
       DB_USER: postgres
       DB_PASSWORD: postgres

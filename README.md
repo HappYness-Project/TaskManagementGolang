@@ -20,8 +20,13 @@ make start
 ```
 Above comment will create the postgres database within the docker and create the tables and sample data.
 
-If you want to reset,
+If you want to stop/remove the containers,
 ```sh
-make stop
+make down
+```
+
+Rebuild command
+```sh
+make rebuild-docker
 ```
 
