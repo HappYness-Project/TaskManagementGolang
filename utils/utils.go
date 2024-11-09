@@ -8,9 +8,6 @@ import (
 	"net/http"
 )
 
-type ErrorResponse struct {
-	Error string `json:"error"`
-}
 type JSONResponse struct {
 	Error   bool        `json:"error"`
 	Message string      `json:"message"`
@@ -22,12 +19,6 @@ func WriteJsonWithEncode(w http.ResponseWriter, status int, v any) error {
 	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(v)
 }
-func WriteJSON(w http.ResponseWriter, status int, body []byte) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(status)
-	w.Write(body)
-}
-
 func ParseJSON(r *http.Request, v any) error {
 	if r.Body == nil {
 		return fmt.Errorf("missing request body")
@@ -35,7 +26,7 @@ func ParseJSON(r *http.Request, v any) error {
 
 	return json.NewDecoder(r.Body).Decode(v)
 }
-func errorJSON(w http.ResponseWriter, err error, status ...int) error {
+func ErrorJSON(w http.ResponseWriter, err error, status ...int) error {
 	statusCode := http.StatusBadRequest
 	if len(status) > 0 {
 		statusCode = status[0]

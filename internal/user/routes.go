@@ -23,14 +23,9 @@ func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Hand
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
-	// router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
 	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
 	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }
-
-type contextKey string
-
-const userIDKey contextKey = "userID"
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 
@@ -47,18 +42,12 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userJson, _ := json.Marshal(users)
-	utils.WriteJSON(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
 }
-
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "userID")
-	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing User ID"))
-		return
-	}
-	userID, err := strconv.Atoi(vars)
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
 	user, err := h.userRepo.GetUserById(userID)
@@ -67,22 +56,22 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userJson, _ := json.Marshal(user)
-	utils.WriteJSON(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		utils.ErrorJSON(w, fmt.Errorf("missing Group ID"), http.StatusBadRequest)
 		return
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
+		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
 	user, err := h.userRepo.GetUsersByGroupId(groupId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
+		utils.ErrorJSON(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, user)
@@ -123,5 +112,5 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	userDetailDto.UserSetting = usersetting
 
 	userJson, _ := json.Marshal(userDetailDto)
-	utils.WriteJSON(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
 }

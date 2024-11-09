@@ -37,7 +37,7 @@ func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request
 		return
 	}
 	containersJson, _ := json.Marshal(containers)
-	utils.WriteJSON(w, http.StatusOK, containersJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, containersJson)
 }
 func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")
@@ -72,7 +72,7 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 		return
 	}
 	containersJson, _ := json.Marshal(containers)
-	utils.WriteJSON(w, http.StatusOK, containersJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, containersJson)
 }
 
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {

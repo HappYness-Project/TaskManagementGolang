@@ -8,7 +8,7 @@ help:
 	@echo "make start to start go-api server"
 	@echo "make test to run the unit test"
 
-version:
+version:ß
 	@echo $(VERSION)
 
 start:
