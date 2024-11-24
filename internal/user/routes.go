@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
@@ -23,6 +24,7 @@ func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Hand
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
+	router.Post("/api/users", auth.WithJWTAuth(h.handleCreateUser))
 	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
 	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
 }
@@ -113,4 +115,28 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 
 	userJson, _ := json.Marshal(userDetailDto)
 	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
+}
+func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
+	var createDto CreateUserDto
+	if err := utils.ParseJSON(r, &createDto); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	user := User{
+		Id:        auth.GetUserIDFromContext(r.Context()),
+		UserName:  createDto.UserName,
+		FirstName: createDto.FirstName,
+		LastName:  createDto.LastName,
+		Email:     createDto.Email,
+		IsActive:  true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	err := h.userRepo.Create(user)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	utils.WriteJsonWithEncode(w, http.StatusCreated, "User is created.")
 }

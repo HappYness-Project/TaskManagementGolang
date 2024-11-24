@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type UserRepository interface {
@@ -106,6 +107,26 @@ func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
 	return users, nil
 }
 func (m *UserRepo) Create(user User) error {
+
+	tx, err := m.DB.Begin()
+	if err != nil {
+		return fmt.Errorf("begin transaction failure")
+	}
+
+	_, err = tx.Exec(sqlCreateUser, user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt)
+	if err != nil {
+		return fmt.Errorf("unable to insert into user table : %w", err)
+	}
+
+	_, err = tx.Exec(sqlCreateUserSetting, user.Id, 0)
+	if err != nil {
+		return fmt.Errorf("unable to insert into usersetting table : %w", err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return fmt.Errorf("commit failure: %w", err)
+	}
+
 	return nil
 }
 func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
