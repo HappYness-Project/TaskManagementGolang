@@ -83,16 +83,16 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	var err error
 	if findField == "email" {
 		user, err = h.userRepo.GetUserByEmail(findVar)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
 	} else if findField == "username" {
 		user, err = h.userRepo.GetUserByUsername(findVar)
-		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, err)
-			return
-		}
+	}
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+	if user.Id == 0 {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find user"))
+		return
 	}
 
 	userDetailDto := new(UserDetailDto)
@@ -113,8 +113,7 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	usersetting, _ := h.userRepo.GetGroupSettingByUserId(user.Id)
 	userDetailDto.UserSetting = usersetting
 
-	userJson, _ := json.Marshal(userDetailDto)
-	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, userDetailDto)
 }
 func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserDto

@@ -106,7 +106,7 @@ func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	task, err := h.taskRepo.GetTaskById(taskId)
-	if err != nil {
+	if err != nil || task == nil {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find task"))
 		return
 	}
