@@ -93,9 +93,9 @@ CREATE TABLE IF NOT EXISTS public.usergroup_user (
 
 INSERT INTO public.usersetting(id, default_group_id) VALUES (1, 1);
 INSERT INTO public.usersetting(id, default_group_id) VALUES (2, 1);
-INSERT INTO public.usersetting(id, default_group_id) VALUES (3, 0);
-INSERT INTO public.usersetting(id, default_group_id) VALUES (4, 0);
-INSERT INTO public.usersetting(id, default_group_id) VALUES (5, 0);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (3, 1);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (4, 2);
+INSERT INTO public.usersetting(id, default_group_id) VALUES (5, 2);
 
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',1);
 INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00', 2);

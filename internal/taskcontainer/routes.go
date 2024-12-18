@@ -71,8 +71,7 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("container does not exist"))
 		return
 	}
-	containersJson, _ := json.Marshal(containers)
-	utils.WriteJsonWithEncode(w, http.StatusOK, containersJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, containers)
 }
 
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
