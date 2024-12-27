@@ -6,9 +6,13 @@ VERSION ?= $(shell git rev-parse --short HEAD)
 help:
 	@echo "make version to get the current version"
 	@echo "make start to start go-api server"
+	@echo "make build"
+	@echo "make rebuild-docker"
+	@echo "make logs"
+	@echo "make down to remove docker containers"
 	@echo "make test to run the unit test"
 
-version:ß
+version:
 	@echo $(VERSION)
 
 start:
@@ -18,7 +22,6 @@ start:
 down:
 	@echo "Stopping app..."
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
-
 
 build:
 	go build -v ./...

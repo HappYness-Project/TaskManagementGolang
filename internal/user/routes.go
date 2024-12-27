@@ -1,7 +1,6 @@
 package user
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -23,10 +22,10 @@ func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Hand
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
-	router.Get("/api/users", auth.WithJWTAuth(h.handleGetUsers))
-	router.Post("/api/users", auth.WithJWTAuth(h.handleCreateUser))
-	router.Get("/api/users/{userID}", auth.WithJWTAuth(h.handleGetUser))
-	router.Get("/api/user-groups/{groupID}/users", auth.WithJWTAuth(h.handleGetUsersByGroupId))
+	router.Get("/api/users", h.handleGetUsers)
+	router.Post("/api/users", h.handleCreateUser)
+	router.Get("/api/users/{userID}", h.handleGetUser)
+	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
@@ -43,8 +42,7 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	userJson, _ := json.Marshal(users)
-	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, users)
 }
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
@@ -57,8 +55,7 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
 	}
-	userJson, _ := json.Marshal(user)
-	utils.WriteJsonWithEncode(w, http.StatusOK, userJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, user)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
