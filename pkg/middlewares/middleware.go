@@ -1,8 +1,8 @@
-package api
+package middlewares
 
 import "net/http"
 
-func enableCORS(h http.Handler) http.Handler {
+func EnableCORS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "http://*")
 		if r.Method == "OPTIONS" {

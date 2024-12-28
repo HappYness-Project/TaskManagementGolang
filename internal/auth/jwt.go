@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 

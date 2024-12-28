@@ -8,11 +8,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
-	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
 	"github.com/happYness-Project/taskManagementGolang/internal/task"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/middlewares"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
@@ -36,7 +37,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	mux.Use(enableCORS)
+	mux.Use(middlewares.EnableCORS)
 	mux.Use(middleware.Heartbeat("/ping"))
 
 	// Apply JWT verification and authentication to all routes

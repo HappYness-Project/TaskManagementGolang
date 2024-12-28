@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/happYness-Project/taskManagementGolang/cmd/api"
-	"github.com/happYness-Project/taskManagementGolang/cmd/configs"
-	"github.com/happYness-Project/taskManagementGolang/cmd/db"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/dbs"
 )
 
 func runTestServer() *httptest.Server {
@@ -19,7 +19,7 @@ func runTestServer() *httptest.Server {
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
 
 	log.Print(connStr)
-	database, err := db.ConnectToDb(connStr)
+	database, err := dbs.ConnectToDb(connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
