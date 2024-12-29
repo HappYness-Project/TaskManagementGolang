@@ -2,8 +2,8 @@ package loggers
 
 import (
 	"io"
+	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -38,32 +38,28 @@ func Setup(env configs.Env) *AppLogger {
 	return appLogger
 }
 
-// func (l *AppLogger) WithReqID(ctx *gin.Context) (zerolog.Logger, string) {
-// 	if rID := ctx.Request.Context().Value(utils.ContextKey(utils.RequestIdentifier)); rID != nil {
-// 		if reqID, ok := rID.(string); ok {
-// 			return l.zLogger.With().Str(utils.RequestIdentifier, reqID).Logger(), reqID
-// 		}
-// 		return l.zLogger, ""
-// 	}
-// 	return l.zLogger, ""
-// }
+func (l *AppLogger) WithReqID(r *http.Request) (zerolog.Logger, string) {
+	if rID := r.Context().Value(utils.ContextKey(utils.RequestIdentifier)); rID != nil {
+		if reqID, ok := rID.(string); ok {
+			return l.zLogger.With().Str(utils.RequestIdentifier, reqID).Logger(), reqID
+		}
+		return l.zLogger, ""
+	}
+	return l.zLogger, ""
+}
 
-// Fatal logs a message with fatal level and exits the program.
 func (l *AppLogger) Fatal() *zerolog.Event {
 	return l.zLogger.Fatal()
 }
 
-// Error logs a message with error level.
 func (l *AppLogger) Error() *zerolog.Event {
 	return l.zLogger.Error()
 }
 
-// Info logs a message with info level.
 func (l *AppLogger) Info() *zerolog.Event {
 	return l.zLogger.Info()
 }
 
-// Debug logs a message with debug level.
 func (l *AppLogger) Debug() *zerolog.Event {
 	return l.zLogger.Debug()
 }
@@ -81,7 +77,4 @@ func ZerologLevel(level string) zerolog.Level {
 	default:
 		return zerolog.InfoLevel
 	}
-}
-func isDevMode(s string) bool {
-	return strings.Contains(s, "local") || strings.Contains(s, "dev")
 }
