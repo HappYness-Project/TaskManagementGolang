@@ -38,6 +38,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Use(middlewares.EnableCORS)
+	mux.Use(middlewares.RequestIdMiddleware)
 	mux.Use(middleware.Heartbeat("/ping"))
 
 	// Apply JWT verification and authentication to all routes

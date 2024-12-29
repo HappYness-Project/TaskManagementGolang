@@ -1,7 +1,6 @@
 package taskcontainer
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -36,8 +35,7 @@ func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	containersJson, _ := json.Marshal(containers)
-	utils.WriteJsonWithEncode(w, http.StatusOK, containersJson)
+	utils.WriteJsonWithEncode(w, http.StatusOK, containers)
 }
 func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")
