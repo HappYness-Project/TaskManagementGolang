@@ -10,6 +10,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/cmd/api"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/dbs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 )
 
 func runTestServer() *httptest.Server {
@@ -17,14 +18,14 @@ func runTestServer() *httptest.Server {
 	configs.AccessToken = env.AccessTokenSecret
 	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
-
-	log.Print(connStr)
+	logger := loggers.Setup(env)
+	logger.Info().Msg(connStr)
 	database, err := dbs.ConnectToDb(connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := api.NewApiServer(fmt.Sprintf(":%d", 8000), database)
+	server := api.NewApiServer(fmt.Sprintf(":%d", 8000), database, logger)
 	return httptest.NewServer(server.Setup())
 }
 

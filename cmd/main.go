@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// how to get the environment from the application side?
 	var current_env = os.Getenv("APP_ENV")
 	fmt.Println("Current Environment : " + current_env)
 	env := configs.InitConfig(current_env)
@@ -27,7 +26,7 @@ func main() {
 		return
 	}
 
-	server := api.NewApiServer(fmt.Sprintf(":%d", env.Port), database)
+	server := api.NewApiServer(fmt.Sprintf(":%d", env.Port), database, logger)
 	r := server.Setup()
 	if err := server.Run(r); err != nil {
 		logger.Error().Err(err).Msg("Unable to set up the server.")
