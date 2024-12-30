@@ -77,7 +77,6 @@ func TestContainerRepo_ContainerById(t *testing.T) {
 		// TODO Need to update GetById to handle different scenario.
 	})
 }
-
 func TestContainerRepo_GetContainersByGroupId(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)

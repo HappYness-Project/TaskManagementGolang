@@ -22,10 +22,14 @@ func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Hand
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
-	router.Get("/api/users", h.handleGetUsers)
-	router.Post("/api/users", h.handleCreateUser)
-	router.Get("/api/users/{userID}", h.handleGetUser)
-	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
+
+	router.Route("/api/users", func(r chi.Router) {
+		router.Get("/", h.handleGetUsers)
+		router.Post("/", h.handleCreateUser)
+		router.Put("/{userID}", h.handleUpdateUser)
+		router.Get("/{userID}", h.handleGetUser)
+		router.Get("/{groupID}/users", h.handleGetUsersByGroupId)
+	})
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
@@ -129,10 +133,46 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	err := h.userRepo.Create(user)
+	err := h.userRepo.CreateUser(user)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusCreated, "User is created.")
+}
+func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	var updateDto UpdateUserDto
+	if err := utils.ParseJSON(r, &updateDto); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
+	if err != nil {
+		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.userRepo.GetUserById(userID)
+	if err != nil || user == nil {
+		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find user"))
+		return
+	}
+
+	updatedUser := User{
+		Id:        auth.GetUserIDFromContext(r.Context()),
+		UserName:  user.UserName,
+		FirstName: updateDto.FirstName,
+		LastName:  updateDto.LastName,
+		Email:     updateDto.Email,
+		IsActive:  true,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: time.Now(),
+	}
+	err = h.userRepo.UpdateUser(updatedUser)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
 }

@@ -12,6 +12,11 @@ type CreateUserDto struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
 }
+type UpdateUserDto struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+}
 type UserDetailDto struct {
 	Id          int                    `json:"id"`
 	UserName    string                 `json:"username"`

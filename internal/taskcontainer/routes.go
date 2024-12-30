@@ -51,7 +51,6 @@ func (h *Handler) handleGetTaskContainerById(w http.ResponseWriter, r *http.Requ
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, container)
 }
-
 func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *http.Request) {
 	groupIdVar := chi.URLParam(r, "usergroupID")
 	if groupIdVar == "" {
@@ -71,7 +70,6 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, containers)
 }
-
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateContainerDto
 	if err := utils.ParseJSON(r, &createDto); err != nil {
@@ -91,7 +89,6 @@ func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Reque
 	_ = h.containerRepo.CreateContainer(container)
 	utils.WriteJsonWithEncode(w, http.StatusCreated, container.Id)
 }
-
 func (h *Handler) handleDeleteTaskContainer(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")
 	err := h.containerRepo.DeleteContainer(containerId)

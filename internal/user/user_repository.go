@@ -13,7 +13,8 @@ type UserRepository interface {
 	GetUsersByGroupId(groupId int) ([]*User, error)
 	GetDefaultGroupId(settingId int) (int, error)
 	GetGroupSettingByUserId(id int) (*UserSetting, error)
-	Create(user User) error
+	CreateUser(user User) error
+	UpdateUser(user User) error
 }
 type UserRepo struct {
 	DB *sql.DB
@@ -106,7 +107,7 @@ func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
 	}
 	return users, nil
 }
-func (m *UserRepo) Create(user User) error {
+func (m *UserRepo) CreateUser(user User) error {
 
 	tx, err := m.DB.Begin()
 	if err != nil {
@@ -127,6 +128,13 @@ func (m *UserRepo) Create(user User) error {
 		return fmt.Errorf("commit failure: %w", err)
 	}
 
+	return nil
+}
+func (m *UserRepo) UpdateUser(user User) error {
+	_, err := m.DB.Exec(sqlUpdateUser, user.Id, user.FirstName, user.LastName, user.Email, user.UpdatedAt)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
