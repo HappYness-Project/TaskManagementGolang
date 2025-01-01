@@ -15,7 +15,6 @@ func IsDevMode(s string) bool {
 func FormatTimeToISO(timeToFormat time.Time) string {
 	return timeToFormat.Format(time.RFC3339)
 }
-
 func CurrentISOTime() string {
 	return FormatTimeToISO(time.Now().UTC())
 }

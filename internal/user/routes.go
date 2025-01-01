@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
@@ -51,7 +51,7 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
-		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
 	user, err := h.userRepo.GetUserById(userID)
@@ -64,17 +64,17 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
-		utils.ErrorJSON(w, fmt.Errorf("missing Group ID"), http.StatusBadRequest)
+		utils.ErrorJson(w, fmt.Errorf("missing Group ID"), http.StatusBadRequest)
 		return
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
 	user, err := h.userRepo.GetUsersByGroupId(groupId)
 	if err != nil {
-		utils.ErrorJSON(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
+		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
 	utils.WriteJsonWithEncode(w, http.StatusOK, user)
@@ -118,7 +118,7 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 }
 func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserDto
-	if err := utils.ParseJSON(r, &createDto); err != nil {
+	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -142,14 +142,14 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 }
 func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateDto UpdateUserDto
-	if err := utils.ParseJSON(r, &updateDto); err != nil {
+	if err := utils.ParseJson(r, &updateDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
 	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
-		utils.ErrorJSON(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
 

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
@@ -72,7 +72,7 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 }
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateContainerDto
-	if err := utils.ParseJSON(r, &createDto); err != nil {
+	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}

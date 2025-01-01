@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type contextKey string

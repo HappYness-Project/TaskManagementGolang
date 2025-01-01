@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {

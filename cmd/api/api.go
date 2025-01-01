@@ -15,7 +15,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/middlewares"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type ApiServer struct {

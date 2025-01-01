@@ -12,7 +12,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
-	"github.com/happYness-Project/taskManagementGolang/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
@@ -81,7 +81,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var createDto CreateTaskDto
-	if err := utils.ParseJSON(r, &createDto); err != nil {
+	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
@@ -107,7 +107,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 	taskId := chi.URLParam(r, "taskID")
 	var updateDto UpdateTaskDto
-	if err := utils.ParseJSON(r, &updateDto); err != nil {
+	if err := utils.ParseJson(r, &updateDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
