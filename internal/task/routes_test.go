@@ -11,6 +11,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +20,11 @@ import (
 func TestTaskHandler(t *testing.T) {
 	repo := &mockTaskRepo{}
 	containerRepo := &mockContainerRepo{}
-	handler := NewHandler(repo, containerRepo, nil)
+
+	env := configs.Env{}
+	logger := loggers.Setup(env)
+
+	handler := NewHandler(logger, repo, containerRepo, nil)
 
 	t.Run("when get all tasks, Then return status code 200 with tasks", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/tasks", nil)

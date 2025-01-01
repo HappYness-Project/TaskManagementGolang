@@ -11,17 +11,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/utils"
 )
 
 type Handler struct {
+	logger        *loggers.AppLogger
 	taskRepo      TaskRepository
 	containerRepo taskcontainer.ContainerRepository
 	groupRepo     usergroup.UserGroupRepository
 }
 
-func NewHandler(repo TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
-	return &Handler{taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
+func NewHandler(logger *loggers.AppLogger, repo TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+	return &Handler{logger: logger, taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/tasks", func(r chi.Router) {
@@ -39,6 +41,10 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.taskRepo.GetAllTasks()
 	if err != nil {
+		h.logger.Error().
+			Err(err).
+			Str("ErrorCode", TaskGetServerError).
+			Msg("Error occurred during GetAllTasks.")
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}

@@ -57,7 +57,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 
 	userHandler := user.NewHandler(userRepo, usergroupRepo)
 	usergroupHandler := usergroup.NewHandler(usergroupRepo)
-	taskHandler := task.NewHandler(taskRepo, containerRepo, usergroupRepo)
+	taskHandler := task.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
 	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
 
 	userHandler.RegisterRoutes(mux)
