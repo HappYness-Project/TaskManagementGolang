@@ -8,7 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
-	"github.com/happYness-Project/taskManagementGolang/internal/task"
+	"github.com/happYness-Project/taskManagementGolang/internal/task/repository"
+	task "github.com/happYness-Project/taskManagementGolang/internal/task/route"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/user"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
@@ -52,7 +53,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 
 	userRepo := user.NewUserRepository(s.db)
 	usergroupRepo := usergroup.NewUserGroupRepository(s.db)
-	taskRepo := task.NewTaskRepository(s.db)
+	taskRepo := repository.NewTaskRepository(s.db)
 	containerRepo := taskcontainer.NewContainerRepository(s.db)
 
 	userHandler := user.NewHandler(userRepo, usergroupRepo)

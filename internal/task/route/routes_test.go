@@ -1,4 +1,4 @@
-package task
+package route
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/happYness-Project/taskManagementGolang/internal/task/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
@@ -34,7 +35,7 @@ func TestTaskHandler(t *testing.T) {
 		mux.Get("/api/tasks", handler.handleGetTasks)
 		mux.ServeHTTP(rr, req)
 		assertStatus(t, rr.Code, http.StatusOK)
-		var tasks []Task
+		var tasks []model.Task
 		err := json.Unmarshal(rr.Body.Bytes(), &tasks)
 		require.NoError(t, err)
 		assert.NotNil(t, tasks)
@@ -160,24 +161,24 @@ func TestTaskHandler(t *testing.T) {
 
 type mockTaskRepo struct{}
 
-func (m *mockTaskRepo) GetAllTasks() ([]Task, error) {
-	var mockTasks = []Task{
+func (m *mockTaskRepo) GetAllTasks() ([]model.Task, error) {
+	var mockTasks = []model.Task{
 		{TaskId: uuid.New().String(), TaskName: "TaskName #1", TaskDesc: "Task Desc #1", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*1)},
 		{TaskId: uuid.New().String(), TaskName: "TaskName #2", TaskDesc: "Task Desc #2", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*2)},
 		{TaskId: uuid.New().String(), TaskName: "TaskName #3", TaskDesc: "Task Desc #3", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*3)},
 	}
 	return mockTasks, nil
 }
-func (m *mockTaskRepo) GetTaskById(id string) (*Task, error) {
-	return &Task{}, nil
+func (m *mockTaskRepo) GetTaskById(id string) (*model.Task, error) {
+	return &model.Task{}, nil
 }
-func (m *mockTaskRepo) GetTasksByContainerId(containerId string) ([]Task, error) {
-	return []Task{}, nil
+func (m *mockTaskRepo) GetTasksByContainerId(containerId string) ([]model.Task, error) {
+	return []model.Task{}, nil
 }
-func (m *mockTaskRepo) CreateTask(containerId string, req Task) (Task, error) {
-	return Task{}, nil
+func (m *mockTaskRepo) CreateTask(containerId string, req model.Task) (model.Task, error) {
+	return model.Task{}, nil
 }
-func (m *mockTaskRepo) UpdateTask(task Task) error {
+func (m *mockTaskRepo) UpdateTask(task model.Task) error {
 	return nil
 }
 func (m *mockTaskRepo) DeleteTask(id string) error {
@@ -189,11 +190,11 @@ func (m *mockTaskRepo) DoneTask(id string, isDone bool) error {
 func (m *mockTaskRepo) UpdateImportantTask(id string, isImportant bool) error {
 	return nil
 }
-func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]Task, error) {
-	return []Task{}, nil
+func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]model.Task, error) {
+	return []model.Task{}, nil
 }
-func (m *mockTaskRepo) GetAllTasksByGroupIdOnlyImportant(groupId int) ([]Task, error) {
-	return []Task{}, nil
+func (m *mockTaskRepo) GetAllTasksByGroupIdOnlyImportant(groupId int) ([]model.Task, error) {
+	return []model.Task{}, nil
 }
 
 type mockContainerRepo struct{}

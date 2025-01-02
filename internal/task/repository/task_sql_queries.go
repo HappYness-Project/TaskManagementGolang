@@ -1,4 +1,4 @@
-package task
+package repository
 
 const (
 	sqlGetAllTasks              = `SELECT * FROM public.task`

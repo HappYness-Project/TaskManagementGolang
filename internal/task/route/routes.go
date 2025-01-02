@@ -1,4 +1,4 @@
-package task
+package route
 
 import (
 	"encoding/json"
@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/happYness-Project/taskManagementGolang/internal/task/model"
+	"github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
@@ -17,12 +19,12 @@ import (
 
 type Handler struct {
 	logger        *loggers.AppLogger
-	taskRepo      TaskRepository
+	taskRepo      repository.TaskRepository
 	containerRepo taskcontainer.ContainerRepository
 	groupRepo     usergroup.UserGroupRepository
 }
 
-func NewHandler(logger *loggers.AppLogger, repo TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+func NewHandler(logger *loggers.AppLogger, repo repository.TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
 	return &Handler{logger: logger, taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
@@ -85,7 +87,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	task := Task{
+	task := model.Task{
 		TaskId:     uuid.New().String(),
 		TaskName:   createDto.TaskName,
 		TaskDesc:   createDto.TaskDesc,
@@ -214,7 +216,7 @@ func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("usergroup cannot be found"))
 		return
 	}
-	var tasks []Task
+	var tasks []model.Task
 
 	if r.URL.Query().Get("important") == "true" {
 		tasks, err = h.taskRepo.GetAllTasksByGroupIdOnlyImportant(usergroup.GroupId)
