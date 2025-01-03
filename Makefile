@@ -17,7 +17,7 @@ version:
 
 start:
 	@echo "Starting app..."
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) up --build -d
+	@docker compose -f $(DOCKER_COMPOSE_FILE) up --build -d
 
 down:
 	@echo "Stopping app..."
