@@ -1,4 +1,4 @@
-package taskcontainer
+package route
 
 import (
 	"net/http"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
 )
 
 func TestTaskContainerHandler(t *testing.T) {
@@ -51,16 +52,16 @@ func TestTaskContainerHandler(t *testing.T) {
 
 type mockContainerRepo struct{}
 
-func (m *mockContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
-	return []*TaskContainer{}, nil
+func (m *mockContainerRepo) AllTaskContainers() ([]*model.TaskContainer, error) {
+	return []*model.TaskContainer{}, nil
 }
-func (m *mockContainerRepo) GetById(id string) (*TaskContainer, error) {
-	return &TaskContainer{}, nil
+func (m *mockContainerRepo) GetById(id string) (*model.TaskContainer, error) {
+	return &model.TaskContainer{}, nil
 }
-func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, error) {
-	return []TaskContainer{}, nil
+func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]model.TaskContainer, error) {
+	return []model.TaskContainer{}, nil
 }
-func (m *mockContainerRepo) CreateContainer(c TaskContainer) error {
+func (m *mockContainerRepo) CreateContainer(c model.TaskContainer) error {
 	return nil
 }
 func (m *mockContainerRepo) DeleteContainer(id string) error {

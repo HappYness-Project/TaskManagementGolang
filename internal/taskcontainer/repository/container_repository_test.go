@@ -1,4 +1,4 @@
-package taskcontainer
+package repository
 
 import (
 	"database/sql"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
 	"github.com/stretchr/testify/require"
 )
 
@@ -96,8 +97,8 @@ func TestContainerRepo_GetContainersByGroupId(t *testing.T) {
 	})
 }
 
-func mockContainerObj() TaskContainer {
-	return TaskContainer{
+func mockContainerObj() model.TaskContainer {
+	return model.TaskContainer{
 		Id:          uuid.New().String(),
 		Name:        "testuser",
 		Description: "testdesc",
@@ -105,7 +106,7 @@ func mockContainerObj() TaskContainer {
 		UsergroupId: 1,
 	}
 }
-func mockContainerRows(c TaskContainer) *sqlmock.Rows {
+func mockContainerRows(c model.TaskContainer) *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "name", "description", "is_active", "usergroup_id"}).
 		AddRow(c.Id, c.Name, c.Description, c.IsActive, c.UsergroupId)
 }

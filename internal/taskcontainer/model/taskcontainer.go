@@ -1,4 +1,4 @@
-package taskcontainer
+package model
 
 type TaskContainer struct {
 	Id             string `json:"id"`
@@ -6,6 +6,6 @@ type TaskContainer struct {
 	Description    string `json:"description"`
 	Type           string `json:"type"`
 	IsActive       bool   `json:"is_active"`
-	activity_level int    `json:"activity_level"`
+	Activity_level int    `json:"activity_level"`
 	UsergroupId    int    `json:"usergroup_id"`
 }

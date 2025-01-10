@@ -1,15 +1,16 @@
-package user
+package repository
 
 import (
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
 	"github.com/stretchr/testify/require"
 )
 
-func mockUserObj() User {
-	return User{
+func mockUserObj() model.User {
+	return model.User{
 		Id:            1,
 		UserName:      "testuser",
 		FirstName:     "kevin",
@@ -21,7 +22,7 @@ func mockUserObj() User {
 		UserSettingId: 1,
 	}
 }
-func mockUserRows(user User) *sqlmock.Rows {
+func mockUserRows(user model.User) *sqlmock.Rows {
 	return sqlmock.NewRows([]string{"id", "username", "first_name", "last_name", "email", "is_active", "created_at", "updated_at", "usersetting_id"}).
 		AddRow(user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.UserSettingId)
 }

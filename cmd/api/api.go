@@ -8,10 +8,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
-	"github.com/happYness-Project/taskManagementGolang/internal/task/repository"
-	task "github.com/happYness-Project/taskManagementGolang/internal/task/route"
-	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
-	"github.com/happYness-Project/taskManagementGolang/internal/user"
+
+	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
+	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
+	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+
+	taskRoute "github.com/happYness-Project/taskManagementGolang/internal/task/route"
+	containerRoute "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/route"
+	userRoute "github.com/happYness-Project/taskManagementGolang/internal/user/route"
+
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
@@ -51,15 +56,15 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(jwtauth.Authenticator)
 	mux.Get("/", home)
 
-	userRepo := user.NewUserRepository(s.db)
+	userRepo := userRepo.NewUserRepository(s.db)
 	usergroupRepo := usergroup.NewUserGroupRepository(s.db)
-	taskRepo := repository.NewTaskRepository(s.db)
-	containerRepo := taskcontainer.NewContainerRepository(s.db)
+	taskRepo := taskRepo.NewTaskRepository(s.db)
+	containerRepo := containerRepo.NewContainerRepository(s.db)
 
-	userHandler := user.NewHandler(userRepo, usergroupRepo)
+	userHandler := userRoute.NewHandler(s.logger, userRepo, usergroupRepo)
 	usergroupHandler := usergroup.NewHandler(usergroupRepo)
-	taskHandler := task.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
-	containerHandler := taskcontainer.NewHandler(containerRepo, userRepo)
+	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
+	containerHandler := containerRoute.NewHandler(containerRepo, userRepo)
 
 	userHandler.RegisterRoutes(mux)
 	usergroupHandler.RegisterRoutes(mux)

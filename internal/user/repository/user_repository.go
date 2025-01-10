@@ -1,20 +1,22 @@
-package user
+package repository
 
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
 )
 
 type UserRepository interface {
-	GetAllUsers() ([]*User, error)
-	GetUserById(id int) (*User, error)
-	GetUserByEmail(email string) (*User, error)
-	GetUserByUsername(username string) (*User, error)
-	GetUsersByGroupId(groupId int) ([]*User, error)
+	GetAllUsers() ([]*model.User, error)
+	GetUserById(id int) (*model.User, error)
+	GetUserByEmail(email string) (*model.User, error)
+	GetUserByUsername(username string) (*model.User, error)
+	GetUsersByGroupId(groupId int) ([]*model.User, error)
 	GetDefaultGroupId(settingId int) (int, error)
-	GetGroupSettingByUserId(id int) (*UserSetting, error)
-	CreateUser(user User) error
-	UpdateUser(user User) error
+	GetGroupSettingByUserId(id int) (*model.UserSetting, error)
+	CreateUser(user model.User) error
+	UpdateUser(user model.User) error
 }
 type UserRepo struct {
 	DB *sql.DB
@@ -24,13 +26,13 @@ func NewUserRepository(db *sql.DB) *UserRepo {
 	return &UserRepo{DB: db}
 }
 
-func (s *UserRepo) GetAllUsers() ([]*User, error) {
+func (s *UserRepo) GetAllUsers() ([]*model.User, error) {
 	rows, err := s.DB.Query(sqlGetAllUsers)
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]*User, 0)
+	users := make([]*model.User, 0)
 	for rows.Next() {
 		p, err := scanRowsIntoUser(rows)
 		if err != nil {
@@ -43,13 +45,13 @@ func (s *UserRepo) GetAllUsers() ([]*User, error) {
 	return users, nil
 }
 
-func (m *UserRepo) GetUserById(id int) (*User, error) {
+func (m *UserRepo) GetUserById(id int) (*model.User, error) {
 	rows, err := m.DB.Query(sqlGetUserById, id)
 	if err != nil {
 		return nil, err
 	}
 
-	user := new(User)
+	user := new(model.User)
 	for rows.Next() {
 		user, err = scanRowsIntoUser(rows)
 		if err != nil {
@@ -59,13 +61,13 @@ func (m *UserRepo) GetUserById(id int) (*User, error) {
 	return user, err
 }
 
-func (m *UserRepo) GetUserByEmail(email string) (*User, error) {
+func (m *UserRepo) GetUserByEmail(email string) (*model.User, error) {
 	rows, err := m.DB.Query(sqlGetUserByEmail, email)
 	if err != nil {
 		return nil, err
 	}
 
-	user := new(User)
+	user := new(model.User)
 	for rows.Next() {
 		user, err = scanRowsIntoUser(rows)
 		if err != nil {
@@ -74,13 +76,13 @@ func (m *UserRepo) GetUserByEmail(email string) (*User, error) {
 	}
 	return user, err
 }
-func (m *UserRepo) GetUserByUsername(username string) (*User, error) {
+func (m *UserRepo) GetUserByUsername(username string) (*model.User, error) {
 	rows, err := m.DB.Query(sqlGetUserByUsername, username)
 	if err != nil {
 		return nil, err
 	}
 
-	user := new(User)
+	user := new(model.User)
 	for rows.Next() {
 		user, err = scanRowsIntoUser(rows)
 		if err != nil {
@@ -90,14 +92,14 @@ func (m *UserRepo) GetUserByUsername(username string) (*User, error) {
 	return user, err
 }
 
-func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
+func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*model.User, error) {
 	rows, err := m.DB.Query(sqlGetUsersByGroupId, groupId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []*User
+	var users []*model.User
 	for rows.Next() {
 		user, err := scanRowsIntoUser(rows)
 		if err != nil {
@@ -107,7 +109,7 @@ func (m *UserRepo) GetUsersByGroupId(groupId int) ([]*User, error) {
 	}
 	return users, nil
 }
-func (m *UserRepo) CreateUser(user User) error {
+func (m *UserRepo) CreateUser(user model.User) error {
 
 	tx, err := m.DB.Begin()
 	if err != nil {
@@ -130,7 +132,7 @@ func (m *UserRepo) CreateUser(user User) error {
 
 	return nil
 }
-func (m *UserRepo) UpdateUser(user User) error {
+func (m *UserRepo) UpdateUser(user model.User) error {
 	_, err := m.DB.Exec(sqlUpdateUser, user.Id, user.FirstName, user.LastName, user.Email, user.UpdatedAt)
 	if err != nil {
 		return err
@@ -147,8 +149,8 @@ func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
 	}
 	return groupId, nil
 }
-func (m *UserRepo) GetGroupSettingByUserId(id int) (*UserSetting, error) {
-	usersetting := UserSetting{}
+func (m *UserRepo) GetGroupSettingByUserId(id int) (*model.UserSetting, error) {
+	usersetting := model.UserSetting{}
 	if err := m.DB.QueryRow(sqlGetUserSettingById, id).Scan(&usersetting.Id, &usersetting.DefaultGroupId); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
@@ -158,8 +160,8 @@ func (m *UserRepo) GetGroupSettingByUserId(id int) (*UserSetting, error) {
 	return &usersetting, nil
 }
 
-func scanRowsIntoUser(rows *sql.Rows) (*User, error) {
-	user := new(User)
+func scanRowsIntoUser(rows *sql.Rows) (*model.User, error) {
+	user := new(model.User)
 
 	err := rows.Scan(
 		&user.Id,

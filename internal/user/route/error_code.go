@@ -1,4 +1,4 @@
-package user
+package route
 
 const prefix = "users_"
 

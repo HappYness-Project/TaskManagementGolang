@@ -21,7 +21,7 @@ start:
 
 down:
 	@echo "Stopping app..."
-	@docker-compose -f $(DOCKER_COMPOSE_FILE) down
+	@docker compose -f $(DOCKER_COMPOSE_FILE) down
 
 build:
 	go build -v ./...

@@ -1,4 +1,4 @@
-package taskcontainer
+package route
 
 import (
 	"fmt"
@@ -8,16 +8,18 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
-	"github.com/happYness-Project/taskManagementGolang/internal/user"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
+	container "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
+	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
-	containerRepo ContainerRepository
+	containerRepo container.ContainerRepository
 	userRepo      user.UserRepository
 }
 
-func NewHandler(repo ContainerRepository, userRepo user.UserRepository) *Handler {
+func NewHandler(repo container.ContainerRepository, userRepo user.UserRepository) *Handler {
 	return &Handler{containerRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
@@ -71,19 +73,19 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 	utils.WriteJsonWithEncode(w, http.StatusOK, containers)
 }
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
-	var createDto CreateContainerDto
+	var createDto model.CreateContainerDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
-	container := TaskContainer{
+	container := model.TaskContainer{
 		Id:             uuid.New().String(),
 		Name:           createDto.Name,
 		Description:    createDto.Description,
 		Type:           createDto.Type,
 		IsActive:       true,
-		activity_level: 0,
+		Activity_level: 0,
 		UsergroupId:    createDto.UserGroupId,
 	}
 	_ = h.containerRepo.CreateContainer(container)

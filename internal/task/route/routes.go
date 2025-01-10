@@ -10,8 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/happYness-Project/taskManagementGolang/internal/task/model"
-	"github.com/happYness-Project/taskManagementGolang/internal/task/repository"
-	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
+	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
+	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
@@ -19,12 +19,12 @@ import (
 
 type Handler struct {
 	logger        *loggers.AppLogger
-	taskRepo      repository.TaskRepository
-	containerRepo taskcontainer.ContainerRepository
+	taskRepo      taskRepo.TaskRepository
+	containerRepo containerRepo.ContainerRepository
 	groupRepo     usergroup.UserGroupRepository
 }
 
-func NewHandler(logger *loggers.AppLogger, repo repository.TaskRepository, tcRepo taskcontainer.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+func NewHandler(logger *loggers.AppLogger, repo taskRepo.TaskRepository, tcRepo containerRepo.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
 	return &Handler{logger: logger, taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {

@@ -1,4 +1,4 @@
-package user
+package route
 
 import (
 	"fmt"
@@ -8,27 +8,31 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/happYness-Project/taskManagementGolang/internal/auth"
+	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
+	"github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
-	userRepo      UserRepository
+	logger        *loggers.AppLogger
+	userRepo      repository.UserRepository
 	userGroupRepo usergroup.UserGroupRepository
 }
 
-func NewHandler(repo UserRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRepo usergroup.UserGroupRepository) *Handler {
 	return &Handler{userRepo: repo, userGroupRepo: ugRepo}
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 
 	router.Route("/api/users", func(r chi.Router) {
-		router.Get("/", h.handleGetUsers)
-		router.Post("/", h.handleCreateUser)
-		router.Put("/{userID}", h.handleUpdateUser)
-		router.Get("/{userID}", h.handleGetUser)
-		router.Get("/{groupID}/users", h.handleGetUsersByGroupId)
+		r.Get("/", h.handleGetUsers)
+		r.Post("/", h.handleCreateUser)
+		r.Put("/{userID}", h.handleUpdateUser)
+		r.Get("/{userID}", h.handleGetUser)
+		r.Get("/{groupID}/users", h.handleGetUsersByGroupId)
 	})
 }
 
@@ -43,6 +47,8 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetServerError).
+			Msg("Error occurred during GetAllUsers.")
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
@@ -56,6 +62,8 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := h.userRepo.GetUserById(userID)
 	if err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).
+			Msg("Error occurred during GetUserById.")
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
 		return
 	}
@@ -80,7 +88,7 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 	utils.WriteJsonWithEncode(w, http.StatusOK, user)
 }
 func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string, findVar string) {
-	var user *User
+	var user *model.User
 	var err error
 	if findField == "email" {
 		user, err = h.userRepo.GetUserByEmail(findVar)
@@ -123,7 +131,7 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := User{
+	user := model.User{
 		Id:        auth.GetUserIDFromContext(r.Context()),
 		UserName:  createDto.UserName,
 		FirstName: createDto.FirstName,
@@ -159,7 +167,7 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updatedUser := User{
+	updatedUser := model.User{
 		Id:        auth.GetUserIDFromContext(r.Context()),
 		UserName:  user.UserName,
 		FirstName: updateDto.FirstName,

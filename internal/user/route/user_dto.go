@@ -1,8 +1,9 @@
-package user
+package route
 
 import (
 	"time"
 
+	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
 )
 
@@ -26,6 +27,6 @@ type UserDetailDto struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 	Email       string                 `json:"email"`
 	IsActive    bool                   `json:"is_active"`
-	UserSetting *UserSetting           `json:"user_setting"`
+	UserSetting *model.UserSetting     `json:"user_setting"`
 	UserGroup   []*usergroup.UserGroup `json:"user_groups"`
 }

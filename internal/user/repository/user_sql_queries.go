@@ -1,4 +1,4 @@
-package user
+package repository
 
 const (
 	sqlGetAllUsers = `SELECT * FROM public.user`

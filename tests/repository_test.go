@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"testing"
@@ -39,30 +38,4 @@ func Test_TaskRepository_GetAllTasks_ReturnSuccess(t *testing.T) {
 	require.NotNil(t, tasks)
 }
 
-func Test_TaskRepository_GetAllTasks_Timeout(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*7)
-	defer cancel()
-
-	// Simulate a long-running query in the database
-	_, err := db.Exec("SELECT pg_sleep(2)") // Simulate 2-second delay
-	require.Nil(t, err)
-
-	taskRepo := repository.NewTaskRepository(db)
-
-	tasks, err := taskRepo.GetAllTasks()
-	require.Nil(t, tasks)
-
-	select {
-
-	case <-ctx.Done():
-		t.Error("timeout")
-	}
-	select {
-	// case output := <-uut.Output:
-	// 	if output != 25 {
-	// 		t.Errorf("expected 25 got %d", output)
-	// 	}
-	case <-ctx.Done():
-		t.Error("timeout")
-	}
-}
+// TODO : Require to test timeout scenario

@@ -1,4 +1,4 @@
-package taskcontainer
+package repository
 
 const (
 	sqlGetAllContainers       = `SELECT id,name,description,is_active,usergroup_id FROM public.taskcontainer`

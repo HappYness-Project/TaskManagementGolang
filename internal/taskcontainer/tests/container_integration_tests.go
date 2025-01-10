@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer"
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/dbs"
 	"github.com/stretchr/testify/require"
@@ -17,7 +17,7 @@ func TestTaskContainerHandlerChecking(t *testing.T) {
 	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
 	database, _ := dbs.ConnectToDb(connStr)
-	containerRepo := taskcontainer.NewContainerRepository(database)
+	containerRepo := repository.NewContainerRepository(database)
 
 	t.Run("Container Exists", func(t *testing.T) {
 		container, err := containerRepo.AllTaskContainers()

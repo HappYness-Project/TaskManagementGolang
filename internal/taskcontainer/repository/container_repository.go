@@ -1,19 +1,21 @@
-package taskcontainer
+package repository
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
 )
 
 const dbTimeout = time.Second * 5
 
 type ContainerRepository interface {
-	AllTaskContainers() ([]*TaskContainer, error)
-	GetById(id string) (*TaskContainer, error)
-	GetContainersByGroupId(groupId int) ([]TaskContainer, error)
-	CreateContainer(container TaskContainer) error
+	AllTaskContainers() ([]*model.TaskContainer, error)
+	GetById(id string) (*model.TaskContainer, error)
+	GetContainersByGroupId(groupId int) ([]model.TaskContainer, error)
+	CreateContainer(container model.TaskContainer) error
 	DeleteContainer(id string) error
 }
 
@@ -27,7 +29,7 @@ func NewContainerRepository(db *sql.DB) *ContainerRepo {
 	}
 }
 
-func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
+func (m *ContainerRepo) AllTaskContainers() ([]*model.TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -37,7 +39,7 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	}
 	defer rows.Close()
 
-	var containers []*TaskContainer
+	var containers []*model.TaskContainer
 	for rows.Next() {
 		container, err := scanRowsIntoContainer(rows)
 		if err != nil {
@@ -49,13 +51,13 @@ func (m *ContainerRepo) AllTaskContainers() ([]*TaskContainer, error) {
 	return containers, nil
 }
 
-func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
+func (m *ContainerRepo) GetById(id string) (*model.TaskContainer, error) {
 	rows, err := m.DB.Query(sqlGetById, id)
 	if err != nil {
 		return nil, err
 	}
 
-	container := new(TaskContainer)
+	container := new(model.TaskContainer)
 	for rows.Next() {
 		container, err = scanRowsIntoContainer(rows)
 		if err != nil {
@@ -65,7 +67,7 @@ func (m *ContainerRepo) GetById(id string) (*TaskContainer, error) {
 	return container, err
 }
 
-func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, error) {
+func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]model.TaskContainer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -75,7 +77,7 @@ func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, er
 	}
 	defer rows.Close()
 
-	containers := []TaskContainer{}
+	containers := []model.TaskContainer{}
 	for rows.Next() {
 		container, err := scanRowsIntoContainer(rows)
 		if err != nil {
@@ -87,8 +89,8 @@ func (m *ContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, er
 	return containers, nil
 }
 
-func (m *ContainerRepo) CreateContainer(c TaskContainer) error {
-	_, err := m.DB.Exec(sqlCreateContainer, c.Id, c.Name, c.Description, c.IsActive, c.activity_level, c.Type, c.UsergroupId)
+func (m *ContainerRepo) CreateContainer(c model.TaskContainer) error {
+	_, err := m.DB.Exec(sqlCreateContainer, c.Id, c.Name, c.Description, c.IsActive, c.Activity_level, c.Type, c.UsergroupId)
 	if err != nil {
 		return fmt.Errorf("unable to insert into taskcontainer table : %w", err)
 	}
@@ -103,8 +105,8 @@ func (m *ContainerRepo) DeleteContainer(id string) error {
 	return nil
 }
 
-func scanRowsIntoContainer(rows *sql.Rows) (*TaskContainer, error) {
-	container := new(TaskContainer)
+func scanRowsIntoContainer(rows *sql.Rows) (*model.TaskContainer, error) {
+	container := new(model.TaskContainer)
 	err := rows.Scan(
 		&container.Id,
 		&container.Name,

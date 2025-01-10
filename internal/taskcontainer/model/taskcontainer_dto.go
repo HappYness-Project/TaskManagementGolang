@@ -1,4 +1,4 @@
-package taskcontainer
+package model
 
 type CreateContainerDto struct {
 	Name        string `json:"name"`
