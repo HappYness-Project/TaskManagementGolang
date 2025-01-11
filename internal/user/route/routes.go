@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/happYness-Project/taskManagementGolang/internal/auth"
+	"github.com/go-chi/jwtauth"
 	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
@@ -130,9 +130,14 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	userId, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
+	if err != nil {
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		return
+	}
 	user := model.User{
-		Id:        auth.GetUserIDFromContext(r.Context()),
+		Id:        userId,
 		UserName:  createDto.UserName,
 		FirstName: createDto.FirstName,
 		LastName:  createDto.LastName,
@@ -141,7 +146,8 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	err := h.userRepo.CreateUser(user)
+
+	err = h.userRepo.CreateUser(user)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -166,9 +172,14 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find user"))
 		return
 	}
-
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	userId, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
+	if err != nil {
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		return
+	}
 	updatedUser := model.User{
-		Id:        auth.GetUserIDFromContext(r.Context()),
+		Id:        userId,
 		UserName:  user.UserName,
 		FirstName: updateDto.FirstName,
 		LastName:  updateDto.LastName,

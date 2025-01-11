@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/happYness-Project/taskManagementGolang/internal/auth"
+	"github.com/go-chi/jwtauth"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
@@ -21,13 +21,13 @@ func NewHandler(repo UserGroupRepository) *Handler {
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/user-groups", func(r chi.Router) {
-		r.Get("/", auth.WithJWTAuth(h.handleGetUserGroups))
-		r.Get("/{groupID}", auth.WithJWTAuth(h.handleGetUserGroupById))
-		r.Post("/{groupID}/users", auth.WithJWTAuth(h.handleAddUserToGroup))
-		r.Put("/{groupID}/users/{userID}", auth.WithJWTAuth(h.handleRemoveUserFromGroup))
+		r.Get("/", h.handleGetUserGroups)
+		r.Get("/{groupID}", h.handleGetUserGroupById)
+		r.Post("/{groupID}/users", h.handleAddUserToGroup)
+		r.Put("/{groupID}/users/{userID}", h.handleRemoveUserFromGroup)
 	})
-	router.Post("/api/user-groups", auth.WithJWTAuth(h.handleCreateUserGroup))
-	router.Get("/api/users/{userID}/user-groups", auth.WithJWTAuth(h.handleGetUserGroupByUserId))
+	router.Post("/api/user-groups", h.handleCreateUserGroup)
+	router.Get("/api/users/{userID}/user-groups", h.handleGetUserGroupByUserId)
 
 }
 
@@ -60,8 +60,12 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	userID := auth.GetUserIDFromContext(r.Context())
-
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	userID, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
+	if err != nil {
+		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		return
+	}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)

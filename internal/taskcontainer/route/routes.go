@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/happYness-Project/taskManagementGolang/internal/auth"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
 	container "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
@@ -24,12 +23,12 @@ func NewHandler(repo container.ContainerRepository, userRepo user.UserRepository
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/task-containers", func(r chi.Router) {
-		r.Post("/", auth.WithJWTAuth(h.handleCreateTaskContainer))
-		r.Get("/", auth.WithJWTAuth(h.handleGetTaskContainers))
-		r.Get("/{containerID}", auth.WithJWTAuth(h.handleGetTaskContainerById))
-		r.Delete("/{containerID}", auth.WithJWTAuth(h.handleDeleteTaskContainer))
+		r.Post("/", h.handleCreateTaskContainer)
+		r.Get("/", h.handleGetTaskContainers)
+		r.Get("/{containerID}", h.handleGetTaskContainerById)
+		r.Delete("/{containerID}", h.handleDeleteTaskContainer)
 	})
-	router.Get("/api/user-groups/{usergroupID}/task-containers", auth.WithJWTAuth(h.handleGetTaskContainersByGroupId))
+	router.Get("/api/user-groups/{usergroupID}/task-containers", h.handleGetTaskContainersByGroupId)
 }
 func (h *Handler) handleGetTaskContainers(w http.ResponseWriter, r *http.Request) {
 	containers, err := h.containerRepo.AllTaskContainers()
