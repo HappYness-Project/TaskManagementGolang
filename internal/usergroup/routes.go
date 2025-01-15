@@ -79,6 +79,11 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
+	err = ValidateNewUserGroup(*createDto)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	group := UserGroup{
 		GroupName: createDto.GroupName,
@@ -99,6 +104,16 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 	}
 
 	utils.WriteJsonWithEncode(w, http.StatusCreated, "User group is created.")
+}
+
+func ValidateNewUserGroup(req CreateUserGroupDto) error {
+	if req.GroupName == "" {
+		return fmt.Errorf("GroupName field cannot be empty")
+	}
+	if req.GroupType == "" {
+		return fmt.Errorf("GroupType field cannot be empty")
+	}
+	return nil
 }
 
 func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Request) {

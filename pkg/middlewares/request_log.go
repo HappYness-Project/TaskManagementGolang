@@ -33,23 +33,3 @@ func Logger(logger *loggers.AppLogger) func(http.Handler) http.Handler {
 		return http.HandlerFunc(fn)
 	}
 }
-
-// func RequestLog(wrappedHandler http.Handler, lgr *loggers.AppLogger) http.Handler {
-// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-// 		lrw := NewLoggingResponseWriter(w)
-// 		wrappedHandler.ServeHTTP(lrw, r)
-
-// 		l, _ := lgr.WithReqID(r)
-// 		start := time.Now()
-
-// 		l.Info().
-// 			Str("method", r.Method).
-// 			Str("url", r.URL.String()).
-// 			Str("path", r.URL.Path).
-// 			Str("userAgent", r.UserAgent()).
-// 			Int("respStatus", lrw.statusCode).
-// 			Dur("elapsedMs", time.Since(start)).
-// 			Send()
-// 	})
-// }

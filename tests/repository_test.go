@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
@@ -14,8 +13,6 @@ import (
 )
 
 var db *sql.DB
-
-const dbTimeout = time.Second * 5
 
 func TestMain(m *testing.M) {
 	env := configs.InitConfig("")
@@ -38,4 +35,15 @@ func Test_TaskRepository_GetAllTasks_ReturnSuccess(t *testing.T) {
 	require.NotNil(t, tasks)
 }
 
-// TODO : Require to test timeout scenario
+func Test_TaskRepository_GetTaskById_ReturnSuccess(t *testing.T) {
+	taskRepo := repository.NewTaskRepository(db)
+	tasks, err := taskRepo.GetAllTasks()
+	if err != nil {
+		return
+	}
+
+	task, err := taskRepo.GetTaskById(tasks[0].TaskId)
+
+	require.Nil(t, err)
+	require.NotNil(t, task)
+}

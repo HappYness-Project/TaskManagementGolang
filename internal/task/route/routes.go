@@ -82,6 +82,7 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container"))
 		return
 	}
+	//TODO Validation logic
 	var createDto CreateTaskDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
