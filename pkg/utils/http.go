@@ -34,6 +34,21 @@ func ErrorJson(w http.ResponseWriter, err error, status ...int) error {
 	payload.Message = err.Error()
 	return writeJson(w, statusCode, payload)
 }
+func SuccessJson(w http.ResponseWriter, data interface{}, message string, status ...int) error {
+	statusCode := http.StatusOK
+	if len(status) > 0 {
+		statusCode = status[0]
+	}
+
+	payload := JSONResponse{
+		Error:   false,
+		Message: message,
+		Data:    data,
+	}
+
+	return writeJson(w, statusCode, payload)
+}
+
 func WriteError(w http.ResponseWriter, status int, err error) {
 	WriteJsonWithEncode(w, status, map[string]string{"error": err.Error()})
 }

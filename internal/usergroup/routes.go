@@ -3,7 +3,6 @@ package usergroup
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 
@@ -66,22 +65,15 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
 		return
 	}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
 	var createDto *CreateUserGroupDto
-	err = json.Unmarshal(body, &createDto)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+	if err := utils.ParseJson(r, &createDto); err != nil {
+		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
 		return
 	}
+
 	err = ValidateNewUserGroup(*createDto)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -94,16 +86,16 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 	}
 	groupId, err := h.groupRepo.CreateGroup(group)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 	err = h.groupRepo.InsertUserGroupUserTable(groupId, userID)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 
-	utils.WriteJsonWithEncode(w, http.StatusCreated, "User group is created.")
+	utils.SuccessJson(w, nil, "User group is created.", http.StatusCreated)
 }
 
 func ValidateNewUserGroup(req CreateUserGroupDto) error {
