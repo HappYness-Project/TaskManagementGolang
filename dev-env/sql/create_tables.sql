@@ -27,6 +27,7 @@ CREATE TABLE public.user (
     is_active boolean,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
+    default_group_id bigint,
     usersetting_id BIGINT,
     CONSTRAINT pk_user PRIMARY KEY (id),
     CONSTRAINT fk_usersetting_id_usersetting_id FOREIGN KEY (usersetting_id) REFERENCES public.usersetting(id)
@@ -97,11 +98,11 @@ INSERT INTO public.usersetting(id, default_group_id) VALUES (3, 1);
 INSERT INTO public.usersetting(id, default_group_id) VALUES (4, 2);
 INSERT INTO public.usersetting(id, default_group_id) VALUES (5, 2);
 
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',1);
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00', 2);
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('bumsoo1234', 'sam', 'kim', 'bumsoo1234@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',3);
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',4);
-INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, usersetting_id) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',5);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id, usersetting_id) VALUES ('admin', 'admin', 'admin', 'admin@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',1, 1);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id, usersetting_id) VALUES ('hyunbin7303', 'kevin', 'park', 'hyunbin7303@gmail.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00', 1, 2);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id, usersetting_id) VALUES ('bumsoo1234', 'sam', 'kim', 'bumsoo1234@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',1, 3);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id, usersetting_id) VALUES ('testing1', 'test', 'check', 'testing1@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',2, 4);
+INSERT INTO public.user(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id, usersetting_id) VALUES ('testing2', 'test', 'check', 'testing2@hproject.com', true, '2024-08-05 00:00:00', '2024-08-05 00:00:00',2, 5);
 
 INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (1, 'user group #1', 'Description for user group 1', 'normal', '', true);
 INSERT INTO public.usergroup(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (2, 'user group #2', 'Description for user group 2', 'normal', '', true);

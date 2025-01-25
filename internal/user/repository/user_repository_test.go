@@ -11,20 +11,20 @@ import (
 
 func mockUserObj() model.User {
 	return model.User{
-		Id:            1,
-		UserName:      "testuser",
-		FirstName:     "kevin",
-		LastName:      "park",
-		Email:         "testuser@hproject.com",
-		IsActive:      true,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now().Add(time.Duration(20)),
-		UserSettingId: 1,
+		Id:             1,
+		UserName:       "testuser",
+		FirstName:      "kevin",
+		LastName:       "park",
+		Email:          "testuser@hproject.com",
+		IsActive:       true,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now().Add(time.Duration(20)),
+		DefaultGroupId: 1,
 	}
 }
 func mockUserRows(user model.User) *sqlmock.Rows {
-	return sqlmock.NewRows([]string{"id", "username", "first_name", "last_name", "email", "is_active", "created_at", "updated_at", "usersetting_id"}).
-		AddRow(user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.UserSettingId)
+	return sqlmock.NewRows([]string{"id", "username", "first_name", "last_name", "email", "is_active", "created_at", "updated_at", "default_group_id"}).
+		AddRow(user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
 }
 
 func TestUserRepo_GetAllUsers(t *testing.T) {

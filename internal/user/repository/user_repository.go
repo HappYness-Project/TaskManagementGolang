@@ -149,16 +149,6 @@ func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
 	}
 	return groupId, nil
 }
-func (m *UserRepo) GetGroupSettingByUserId(id int) (*model.UserSetting, error) {
-	usersetting := model.UserSetting{}
-	if err := m.DB.QueryRow(sqlGetUserSettingById, id).Scan(&usersetting.Id, &usersetting.DefaultGroupId); err != nil {
-		if err == sql.ErrNoRows {
-			return nil, err
-		}
-		return nil, err
-	}
-	return &usersetting, nil
-}
 
 func scanRowsIntoUser(rows *sql.Rows) (*model.User, error) {
 	user := new(model.User)
@@ -172,7 +162,7 @@ func scanRowsIntoUser(rows *sql.Rows) (*model.User, error) {
 		&user.IsActive,
 		&user.CreatedAt,
 		&user.UpdatedAt,
-		&user.UserSettingId,
+		&user.DefaultGroupId,
 	)
 	if err != nil {
 		return nil, err

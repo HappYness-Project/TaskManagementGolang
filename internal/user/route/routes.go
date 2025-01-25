@@ -119,8 +119,7 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	userDetailDto.Email = user.Email
 	userDetailDto.IsActive = user.IsActive
 	userDetailDto.UserGroup = ugs
-	usersetting, _ := h.userRepo.GetGroupSettingByUserId(user.Id)
-	userDetailDto.UserSetting = usersetting
+	userDetailDto.DefaultGroupId = user.DefaultGroupId
 
 	utils.WriteJsonWithEncode(w, http.StatusOK, userDetailDto)
 }
