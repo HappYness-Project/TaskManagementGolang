@@ -26,14 +26,14 @@ func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRep
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
-
 	router.Route("/api/users", func(r chi.Router) {
 		r.Get("/", h.handleGetUsers)
 		r.Post("/", h.handleCreateUser)
 		r.Put("/{userID}", h.handleUpdateUser)
 		r.Get("/{userID}", h.handleGetUser)
-		r.Get("/{groupID}/users", h.handleGetUsersByGroupId)
 	})
+	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
+
 }
 
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {

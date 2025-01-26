@@ -14,7 +14,6 @@ type UserRepository interface {
 	GetUserByUsername(username string) (*model.User, error)
 	GetUsersByGroupId(groupId int) ([]*model.User, error)
 	GetDefaultGroupId(settingId int) (int, error)
-	GetGroupSettingByUserId(id int) (*model.UserSetting, error)
 	CreateUser(user model.User) error
 	UpdateUser(user model.User) error
 }
