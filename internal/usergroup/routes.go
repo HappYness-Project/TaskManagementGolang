@@ -152,7 +152,7 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 
 	err = h.groupRepo.InsertUserGroupUserTable(groupId, jsonBody.UserId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to add user to the user group"))
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -183,8 +183,8 @@ func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Reque
 
 	err = h.groupRepo.RemoveUserFromUserGroup(groupId, userId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("failed to remove user to the user group"))
+		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is removed from user group ID: %d", groupId))
+	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", 204))
 }

@@ -50,7 +50,7 @@ func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
+	utils.SuccessJson(w, tasks, "successfully get tasks", http.StatusOK)
 }
 func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
 	// TODO Requirement - check if container ID is UUID format.
