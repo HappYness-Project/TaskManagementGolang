@@ -49,10 +49,10 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error().Err(err).Str("ErrorCode", UserGetServerError).
 			Msg("Error occurred during GetAllUsers.")
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.ErrorJson(w, err, http.StatusInternalServerError)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, users)
+	utils.SuccessJson(w, users, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
@@ -64,10 +64,10 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).
 			Msg("Error occurred during GetUserById.")
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("user does not exist"))
+		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, user)
+	utils.SuccessJson(w, user, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
@@ -85,8 +85,9 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, user)
+	utils.SuccessJson(w, user, "success", http.StatusOK)
 }
+
 func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string, findVar string) {
 	var user *model.User
 	var err error
@@ -96,18 +97,18 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 		user, err = h.userRepo.GetUserByUsername(findVar)
 	}
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 	if user.Id == 0 {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find user"))
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
 
 	userDetailDto := new(UserDetailDto)
 	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 	userDetailDto.Id = user.Id
@@ -121,12 +122,13 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 	userDetailDto.UserGroup = ugs
 	userDetailDto.DefaultGroupId = user.DefaultGroupId
 
-	utils.WriteJsonWithEncode(w, http.StatusOK, userDetailDto)
+	utils.SuccessJson(w, userDetailDto, "success", http.StatusOK)
 }
+
 func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 	_, claims, _ := jwtauth.FromContext(r.Context())
@@ -136,14 +138,15 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user := model.User{
-		Id:        userId,
-		UserName:  createDto.UserName,
-		FirstName: createDto.FirstName,
-		LastName:  createDto.LastName,
-		Email:     createDto.Email,
-		IsActive:  true,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Id:             userId,
+		UserName:       createDto.UserName,
+		FirstName:      createDto.FirstName,
+		LastName:       createDto.LastName,
+		Email:          createDto.Email,
+		IsActive:       true,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		DefaultGroupId: 0,
 	}
 
 	err = h.userRepo.CreateUser(user)
@@ -151,12 +154,13 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusCreated, "User is created.")
+	utils.SuccessJson(w, nil, "User is created.", http.StatusCreated)
 }
+
 func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateDto UpdateUserDto
 	if err := utils.ParseJson(r, &updateDto); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 
@@ -168,7 +172,7 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userRepo.GetUserById(userID)
 	if err != nil || user == nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find user"))
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
 	_, claims, _ := jwtauth.FromContext(r.Context())
@@ -189,7 +193,7 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.userRepo.UpdateUser(updatedUser)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 

@@ -186,5 +186,5 @@ func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Reque
 		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
 		return
 	}
-	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", 204))
+	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
 }

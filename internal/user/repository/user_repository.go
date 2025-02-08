@@ -115,7 +115,7 @@ func (m *UserRepo) CreateUser(user model.User) error {
 		return fmt.Errorf("begin transaction failure")
 	}
 
-	_, err = tx.Exec(sqlCreateUser, user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt)
+	_, err = tx.Exec(sqlCreateUser, user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
 	if err != nil {
 		return fmt.Errorf("unable to insert into user table : %w", err)
 	}
