@@ -26,3 +26,20 @@ jobs:
 
     - name: Test
       run: make test
+
+    - name: 'Create env file'
+      run: |
+        touch .env
+        echo APP_ENV= ${{ vars.APP_ENV }} >> .env
+        echo PORT= ${{ vars.DB_PORT }} >> .env
+        echo CONTEXT_TIMEOUT= 5 >> .env
+        echo DB_HOST= ${{ vars.DB_HOST }} >> .env
+        echo DB_PORT= ${{ vars.DB_PORT }} >> .env
+        echo DB_USER= ${{ vars.DB_USER }} >> .env
+        echo DB_PWD= ${{ vars.DB_PWD }} >> .env
+        echo DB_NAME= ${{ vars.DB_NAME }} >> .env
+        echo ACCESS_TOKEN_EXPIRY_HOUR = 2 >> .env
+        echo REFRESH_TOKEN_EXPIRY_HOUR = 150 >> .env
+        echo ACCESS_TOKEN_SECRET= ${{ secrets.ACCESS_TOKEN_SECRET }} >> .env
+        echo REFRESH_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }} >> .env
+        cat .env
