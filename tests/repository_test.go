@@ -27,6 +27,10 @@ func TestMain(m *testing.M) {
 }
 
 func Test_TaskRepository_GetAllTasks_ReturnSuccess(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
 	taskRepo := repository.NewTaskRepository(db)
 
 	tasks, err := taskRepo.GetAllTasks()
@@ -36,6 +40,10 @@ func Test_TaskRepository_GetAllTasks_ReturnSuccess(t *testing.T) {
 }
 
 func Test_TaskRepository_GetTaskById_ReturnSuccess(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
 	taskRepo := repository.NewTaskRepository(db)
 	tasks, err := taskRepo.GetAllTasks()
 	if err != nil {
