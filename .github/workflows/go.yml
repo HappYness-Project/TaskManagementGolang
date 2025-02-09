@@ -55,3 +55,4 @@ jobs:
           heroku_email: "hyunbin7303@gmail.com"
           branch: "main"
           delay: 3
+          appdir: bin/cmd
