@@ -53,5 +53,5 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: taskapi
           heroku_email: "hyunbin7303@gmail.com"
-          buildpack: ""
+          branch: "main"
           delay: 3
