@@ -28,7 +28,7 @@ jobs:
       run: make test
 
   deploy:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-22.04
       steps:
       - name: 'Create env file'
         run: |
