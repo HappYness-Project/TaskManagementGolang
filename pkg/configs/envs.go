@@ -34,7 +34,6 @@ func InitConfig(envString string) Env {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	for _, e := range entries {
 		fmt.Println(e.Name())
 	}
@@ -44,7 +43,15 @@ func InitConfig(envString string) Env {
 	if envString == "" {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
-		viper.SetConfigFile(".env")
+		entries, err := os.ReadDir(workingdir + "/../")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, e := range entries {
+			fmt.Println(e.Name())
+		}
+
+		viper.SetConfigFile("../.env")
 	}
 	env := Env{}
 	err = viper.ReadInConfig()
