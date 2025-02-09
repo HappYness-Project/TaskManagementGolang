@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -29,14 +30,24 @@ type Env struct {
 var AccessToken string // updated from the main package.
 
 func InitConfig(envString string) Env {
+	entries, err := os.ReadDir("./")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, e := range entries {
+		fmt.Println(e.Name())
+	}
+
 	workingdir, _ := os.Getwd()
+	fmt.Println("Current Dir: " + workingdir)
 	if envString == "" {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
 		viper.SetConfigFile(".env")
 	}
 	env := Env{}
-	err := viper.ReadInConfig()
+	err = viper.ReadInConfig()
 	if err != nil {
 		log.Fatal("Can't find the environment file : ", err)
 	}
