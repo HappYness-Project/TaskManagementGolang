@@ -30,7 +30,9 @@ type Env struct {
 var AccessToken string // updated from the main package.
 
 func InitConfig(envString string) Env {
-	entries, err := os.ReadDir("./")
+	workingdir, _ := os.Getwd()
+	fmt.Println("Current Dir: " + workingdir)
+	entries, err := os.ReadDir(workingdir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,20 +40,19 @@ func InitConfig(envString string) Env {
 		fmt.Println(e.Name())
 	}
 
-	workingdir, _ := os.Getwd()
-	fmt.Println("Current Dir: " + workingdir)
 	if envString == "" {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
-		entries, err := os.ReadDir(workingdir + "/../")
+		fmt.Println("Display ../../")
+		entries, err := os.ReadDir("../../")
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, e := range entries {
 			fmt.Println(e.Name())
 		}
-
-		viper.SetConfigFile("../.env")
+		viper.AddConfigPath(".")
+		viper.SetConfigFile(".env")
 	}
 	env := Env{}
 	err = viper.ReadInConfig()
