@@ -33,7 +33,7 @@ func InitConfig(envString string) Env {
 	if envString == "" {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
-		viper.SetConfigFile("local.env")
+		viper.SetConfigFile(".env")
 	}
 	env := Env{}
 	err := viper.ReadInConfig()
