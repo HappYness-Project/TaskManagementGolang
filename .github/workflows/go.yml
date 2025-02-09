@@ -46,6 +46,13 @@ jobs:
           echo ACCESS_TOKEN_SECRET= ${{ secrets.ACCESS_TOKEN_SECRET }} >> .env
           echo REFRESH_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }} >> .env
           cat .env
+          pwd
+
+          echo "ls -a ."
+          ls -a .
+
+          echo "ls -a ${{ github.workspace }}"
+          ls -a ${{ github.workspace }}
 
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.13.15
@@ -55,4 +62,3 @@ jobs:
           heroku_email: "hyunbin7303@gmail.com"
           branch: "main"
           delay: 3
-          # appdir: bin/cmd
