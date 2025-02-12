@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -31,31 +30,20 @@ var AccessToken string // updated from the main package.
 
 func InitConfig(envString string) Env {
 	workingdir, _ := os.Getwd()
-	fmt.Println("Current Dir: " + workingdir)
-	entries, err := os.ReadDir(workingdir)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, e := range entries {
-		fmt.Println(e.Name())
-	}
-
+	env := Env{}
 	if envString == "" {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
-		fmt.Println("Display ../../")
-		entries, err := os.ReadDir("../../")
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, e := range entries {
-			fmt.Println(e.Name())
-		}
-		viper.AddConfigPath(".")
-		viper.SetConfigFile(".env")
+		env.AppEnv = envString
+		env.DBHost = os.Getenv("DB_HOST")
+		env.DBName = os.Getenv("DB_NAME")
+		env.DBPort = os.Getenv("DB_PORT")
+		env.DBUser = os.Getenv("DB_USER")
+		env.DBPwd = os.Getenv("DB_PWD")
+		env.AccessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+		env.RefreshTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
 	}
-	env := Env{}
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal("Can't find the environment file : ", err)
 	}

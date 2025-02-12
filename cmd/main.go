@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/happYness-Project/taskManagementGolang/cmd/api"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
@@ -12,13 +11,6 @@ import (
 )
 
 func main() {
-	ex, err := os.Executable()
-	if err != nil {
-		panic(err)
-	}
-	exPath := filepath.Dir(ex)
-	fmt.Println("Current Dir: " + exPath)
-
 	var current_env = os.Getenv("APP_ENV")
 	fmt.Println("Current Environment : " + current_env)
 	env := configs.InitConfig(current_env)
