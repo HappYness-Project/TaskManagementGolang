@@ -42,6 +42,7 @@ func InitConfig(envString string) Env {
 		env.DBPwd = os.Getenv("DB_PWD")
 		env.AccessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
 		env.RefreshTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+		return env
 	}
 	err := viper.ReadInConfig()
 	if err != nil {
