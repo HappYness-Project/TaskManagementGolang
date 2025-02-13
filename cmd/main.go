@@ -17,8 +17,14 @@ func main() {
 	logger := loggers.Setup(env)
 	configs.AccessToken = env.AccessTokenSecret
 
-	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s timezone=UTC connect_timeout=5 ",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
+	if current_env == "development" {
+		connStr += "sslmode=require"
+	} else {
+		connStr += "sslmode=disable"
+	}
+
 	logger.Info().Msg(connStr)
 	database, err := dbs.ConnectToDb(connStr)
 	if err != nil {
