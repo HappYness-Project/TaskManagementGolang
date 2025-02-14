@@ -35,6 +35,7 @@ func InitConfig(envString string) Env {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
 		env.AppEnv = envString
+		env.Port = 8080
 		env.DBHost = os.Getenv("DB_HOST")
 		env.DBName = os.Getenv("DB_NAME")
 		env.DBPort = os.Getenv("DB_PORT")
