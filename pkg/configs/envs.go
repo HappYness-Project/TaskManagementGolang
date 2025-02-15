@@ -13,6 +13,7 @@ type Env struct {
 	Port           int    `mapstructure:"PORT"`
 	ContextTimeout int    `mapstructure:"CONTEXT_TIMEOUT"`
 	LogLevel       string `mapstructure:"LOG_LEVEL`
+	Host           string `mapstructure:"HOST"`
 
 	DBHost string `mapstructure:"DB_HOST"`
 	DBPort string `mapstructure:"DB_PORT"`
@@ -35,6 +36,7 @@ func InitConfig(envString string) Env {
 		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
 	} else if envString == "development" {
 		env.AppEnv = envString
+		env.Host = "0.0.0.0"
 		env.Port = 8080
 		env.DBHost = os.Getenv("DB_HOST")
 		env.DBName = os.Getenv("DB_NAME")

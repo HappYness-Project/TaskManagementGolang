@@ -32,7 +32,7 @@ func main() {
 		return
 	}
 
-	server := api.NewApiServer(fmt.Sprintf(":%d", env.Port), database, logger)
+	server := api.NewApiServer(fmt.Sprintf("%s:%d", env.Host, env.Port), database, logger)
 	r := server.Setup()
 	if err := server.Run(r); err != nil {
 		logger.Error().Err(err).Msg("Unable to set up the server.")
