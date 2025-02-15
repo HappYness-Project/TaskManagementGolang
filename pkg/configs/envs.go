@@ -10,7 +10,7 @@ import (
 type Env struct {
 	AppEnv         string `mapstructure:"APP_ENV"`
 	ServerAddress  string `mapstructure:"SERVER_ADDRESS"`
-	Port           int    `mapstructure:"PORT"`
+	Port           string `mapstructure:"PORT"`
 	ContextTimeout int    `mapstructure:"CONTEXT_TIMEOUT"`
 	LogLevel       string `mapstructure:"LOG_LEVEL`
 	Host           string `mapstructure:"HOST"`
@@ -37,7 +37,7 @@ func InitConfig(envString string) Env {
 	} else if envString == "development" {
 		env.AppEnv = envString
 		env.Host = "0.0.0.0"
-		env.Port = 8080
+		env.Port = os.Getenv("PORT")
 		env.DBHost = os.Getenv("DB_HOST")
 		env.DBName = os.Getenv("DB_NAME")
 		env.DBPort = os.Getenv("DB_PORT")
