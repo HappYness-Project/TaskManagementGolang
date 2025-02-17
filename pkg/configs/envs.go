@@ -30,10 +30,12 @@ type Env struct {
 var AccessToken string // updated from the main package.
 
 func InitConfig(envString string) Env {
-	workingdir, _ := os.Getwd()
 	env := Env{}
 	if envString == "" {
-		viper.SetConfigFile(workingdir + "/../dev-env/dev.env")
+		workingdir, _ := os.Getwd()
+		viper.SetConfigFile(workingdir + "/../dev-env/local.env")
+	} else if envString == "local" {
+		viper.SetConfigFile("local.env")
 	} else if envString == "development" {
 		env.AppEnv = envString
 		env.Host = "0.0.0.0"
@@ -56,10 +58,9 @@ func InitConfig(envString string) Env {
 	if err != nil {
 		log.Fatal("Environment can't be loaded: ", err)
 	}
-
-	if env.AppEnv == "development" {
-		log.Println("The App is running in development env")
+	if envString == "" {
+		env.DBHost = "localhost"
+		env.DBPort = "8010"
 	}
-
 	return env
 }

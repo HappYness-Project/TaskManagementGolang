@@ -19,10 +19,10 @@ func main() {
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s timezone=UTC connect_timeout=5 ",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
-	if current_env == "development" {
-		connStr += "sslmode=require"
-	} else {
+	if current_env == "local" || current_env == "" {
 		connStr += "sslmode=disable"
+	} else {
+		connStr += "sslmode=require"
 	}
 
 	logger.Info().Msg(connStr)
