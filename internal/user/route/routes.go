@@ -55,12 +55,7 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	utils.SuccessJson(w, users, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
-	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
-		return
-	}
-	user, err := h.userRepo.GetUserById(userID)
+	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil {
 		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).
 			Msg("Error occurred during GetUserById.")
@@ -132,13 +127,10 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	userId, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
-		return
-	}
+	userId := fmt.Sprintf("%v", claims["nameid"])
+
 	user := model.User{
-		Id:             userId,
+		UserId:         userId,
 		UserName:       createDto.UserName,
 		FirstName:      createDto.FirstName,
 		LastName:       createDto.LastName,
@@ -149,9 +141,9 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		DefaultGroupId: 0,
 	}
 
-	err = h.userRepo.CreateUser(user)
+	err := h.userRepo.CreateUser(user)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.ErrorJson(w, fmt.Errorf("cannot create a user"), http.StatusBadRequest)
 		return
 	}
 	utils.SuccessJson(w, nil, "User is created.", http.StatusCreated)
@@ -164,25 +156,14 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := strconv.Atoi(chi.URLParam(r, "userID"))
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
-		return
-	}
-
-	user, err := h.userRepo.GetUserById(userID)
+	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil || user == nil {
 		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
-	_, claims, _ := jwtauth.FromContext(r.Context())
-	userId, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
-		return
-	}
 	updatedUser := model.User{
-		Id:        userId,
+		Id:        user.Id,
+		UserId:    user.UserId,
 		UserName:  user.UserName,
 		FirstName: updateDto.FirstName,
 		LastName:  updateDto.LastName,
@@ -196,5 +177,7 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
+	// TODO no success message is displayed.
+	utils.SuccessJson(w, nil, "User is updated.", http.StatusNoContent)
 
 }

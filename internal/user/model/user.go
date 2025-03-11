@@ -6,6 +6,7 @@ import (
 
 type User struct {
 	Id             int       `json:"id"`
+	UserId         string    `json:"user_id"`
 	UserName       string    `json:"username"`
 	FirstName      string    `json:"first_name"`
 	LastName       string    `json:"last_name"`
@@ -14,10 +15,4 @@ type User struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 	DefaultGroupId int       `json:"default_group_id"`
-	// UserSettingId    int       `json:"usersetting_id"`
-}
-
-type UserSetting struct {
-	Id             int `json:"id"`
-	DefaultGroupId int `json:"default_group_id"`
 }

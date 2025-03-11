@@ -9,11 +9,10 @@ import (
 
 type UserRepository interface {
 	GetAllUsers() ([]*model.User, error)
-	GetUserById(id int) (*model.User, error)
+	GetUserByUserId(userId string) (*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
 	GetUserByUsername(username string) (*model.User, error)
 	GetUsersByGroupId(groupId int) ([]*model.User, error)
-	GetDefaultGroupId(settingId int) (int, error)
 	CreateUser(user model.User) error
 	UpdateUser(user model.User) error
 }
@@ -44,8 +43,8 @@ func (s *UserRepo) GetAllUsers() ([]*model.User, error) {
 	return users, nil
 }
 
-func (m *UserRepo) GetUserById(id int) (*model.User, error) {
-	rows, err := m.DB.Query(sqlGetUserById, id)
+func (m *UserRepo) GetUserByUserId(user_id string) (*model.User, error) {
+	rows, err := m.DB.Query(sqlGetUserByUserId, user_id)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +114,7 @@ func (m *UserRepo) CreateUser(user model.User) error {
 		return fmt.Errorf("begin transaction failure")
 	}
 
-	_, err = tx.Exec(sqlCreateUser, user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
+	_, err = tx.Exec(sqlCreateUser, user.UserId, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
 	if err != nil {
 		return fmt.Errorf("unable to insert into user table : %w", err)
 	}
@@ -138,22 +137,13 @@ func (m *UserRepo) UpdateUser(user model.User) error {
 	}
 	return nil
 }
-func (m *UserRepo) GetDefaultGroupId(settingId int) (int, error) {
-	var groupId int
-	if err := m.DB.QueryRow(sqlGetDefaultGroupId, settingId).Scan(&groupId); err != nil {
-		if err == sql.ErrNoRows {
-			return 0, err
-		}
-		return 0, err
-	}
-	return groupId, nil
-}
 
 func scanRowsIntoUser(rows *sql.Rows) (*model.User, error) {
 	user := new(model.User)
 
 	err := rows.Scan(
 		&user.Id,
+		&user.UserId,
 		&user.UserName,
 		&user.FirstName,
 		&user.LastName,
