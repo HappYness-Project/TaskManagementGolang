@@ -19,6 +19,7 @@ type UpdateUserDto struct {
 }
 type UserDetailDto struct {
 	Id             int                    `json:"id"`
+	UserId         string                 `json:"user_id"`
 	UserName       string                 `json:"username"`
 	FirstName      string                 `json:"first_name"`
 	LastName       string                 `json:"last_name"`

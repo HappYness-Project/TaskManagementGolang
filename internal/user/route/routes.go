@@ -39,10 +39,10 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Query().Get("email") != "" {
-		h.responseUserUsingEmail(w, "email", r.URL.Query().Get("email"))
+		h.responseUser(w, "email", r.URL.Query().Get("email"))
 		return
 	} else if r.URL.Query().Get("username") != "" {
-		h.responseUserUsingEmail(w, "username", r.URL.Query().Get("username"))
+		h.responseUser(w, "username", r.URL.Query().Get("username"))
 		return
 	}
 	users, err := h.userRepo.GetAllUsers()
@@ -83,7 +83,7 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 	utils.SuccessJson(w, user, "success", http.StatusOK)
 }
 
-func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string, findVar string) {
+func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar string) {
 	var user *model.User
 	var err error
 	if findField == "email" {
@@ -107,6 +107,7 @@ func (h *Handler) responseUserUsingEmail(w http.ResponseWriter, findField string
 		return
 	}
 	userDetailDto.Id = user.Id
+	userDetailDto.UserId = user.UserId
 	userDetailDto.UserName = user.UserName
 	userDetailDto.FirstName = user.FirstName
 	userDetailDto.LastName = user.LastName
