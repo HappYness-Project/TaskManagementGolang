@@ -119,11 +119,6 @@ func (m *UserRepo) CreateUser(user model.User) error {
 		return fmt.Errorf("unable to insert into user table : %w", err)
 	}
 
-	_, err = tx.Exec(sqlCreateUserSetting, user.Id, 0)
-	if err != nil {
-		return fmt.Errorf("unable to insert into usersetting table : %w", err)
-	}
-
 	if err = tx.Commit(); err != nil {
 		return fmt.Errorf("commit failure: %w", err)
 	}
