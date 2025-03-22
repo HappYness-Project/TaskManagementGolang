@@ -62,7 +62,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 	containerRepo := containerRepo.NewContainerRepository(s.db)
 
 	userHandler := userRoute.NewHandler(s.logger, userRepo, usergroupRepo)
-	usergroupHandler := usergroup.NewHandler(usergroupRepo)
+	usergroupHandler := usergroup.NewHandler(usergroupRepo, userRepo)
 	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
 	containerHandler := containerRoute.NewHandler(containerRepo, userRepo)
 

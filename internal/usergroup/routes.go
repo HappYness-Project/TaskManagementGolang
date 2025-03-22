@@ -8,15 +8,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
+	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
 	groupRepo UserGroupRepository
+	userRepo  user.UserRepository
 }
 
-func NewHandler(repo UserGroupRepository) *Handler {
-	return &Handler{groupRepo: repo}
+func NewHandler(repo UserGroupRepository, userRepo user.UserRepository) *Handler {
+	return &Handler{groupRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/user-groups", func(r chi.Router) {
@@ -60,14 +62,14 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	userID, err := strconv.Atoi(fmt.Sprintf("%v", claims["nameid"]))
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
-		return
-	}
 	var createDto *CreateUserGroupDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
+		return
+	}
+	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, fmt.Sprintf("%v", claims["nameid"])))
+	if err != nil || user == nil {
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
 
@@ -89,7 +91,7 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
-	err = h.groupRepo.InsertUserGroupUserTable(groupId, userID)
+	err = h.groupRepo.InsertUserGroupUserTable(groupId, user.Id)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
@@ -141,7 +143,7 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type JsonBody struct {
-		UserId int `json:"user_id"`
+		UserId string `json:"user_id"`
 	}
 	var jsonBody JsonBody
 	err = json.NewDecoder(r.Body).Decode(&jsonBody)
@@ -149,8 +151,13 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	user, err := h.userRepo.GetUserByUserId(jsonBody.UserId)
+	if err != nil || user == nil {
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		return
+	}
 
-	err = h.groupRepo.InsertUserGroupUserTable(groupId, jsonBody.UserId)
+	err = h.groupRepo.InsertUserGroupUserTable(groupId, user.Id)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
@@ -170,18 +177,14 @@ func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Reque
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
 		return
 	}
-	vars = chi.URLParam(r, "userID")
-	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing User ID"))
-		return
-	}
-	userId, err := strconv.Atoi(vars)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid User ID"))
+	userId := chi.URLParam(r, "userID")
+	user, err := h.userRepo.GetUserByUserId(userId)
+	if err != nil || user == nil {
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
 
-	err = h.groupRepo.RemoveUserFromUserGroup(groupId, userId)
+	err = h.groupRepo.RemoveUserFromUserGroup(groupId, user.Id)
 	if err != nil {
 		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
 		return
