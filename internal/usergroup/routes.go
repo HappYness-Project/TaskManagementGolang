@@ -67,7 +67,9 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
 		return
 	}
-	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, fmt.Sprintf("%v", claims["nameid"])))
+
+	userid := fmt.Sprintf("%v", claims["nameid"])
+	user, err := h.userRepo.GetUserByUserId(userid)
 	if err != nil || user == nil {
 		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return

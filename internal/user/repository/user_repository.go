@@ -48,14 +48,16 @@ func (m *UserRepo) GetUserByUserId(user_id string) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	user := new(model.User)
-	for rows.Next() {
-		user, err = scanRowsIntoUser(rows)
-		if err != nil {
-			return nil, err
-		}
+	defer rows.Close()
+	if !rows.Next() {
+		return nil, nil
 	}
+
+	user, err := scanRowsIntoUser(rows)
+	if err != nil {
+		return nil, err
+	}
+
 	return user, err
 }
 

@@ -119,11 +119,10 @@ INSERT INTO public."usergroup"(id, name, description, type, thumbnailurl, is_act
 INSERT INTO public."usergroup"(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (5, 'user group #5', 'Description for user group 5', 'normal', '', false);
 SELECT setval(pg_get_serial_sequence('public.usergroup', 'id'), (SELECT MAX(id) FROM public.usergroup)); -- Due to duplicate key violate issue - manually reset the a primary key index after restoring from a dump file.
 
-INSERT INTO public."user"(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('admin',        'admin', 'admin', 'admin@hproject.com', 		true, '2024-08-05 00:00:00',  	'2024-08-05 00:00:00',1);
-INSERT INTO public."user"(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('hyunbin7303',  'kevin', 'park',  'hyunbin7303@gmail.com', 		true, '2024-08-05 00:00:00',  	'2024-08-05 00:00:00',1);
-INSERT INTO public."user"(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('bumsoo1234',   'sam',   'kim',   'bumsoo1234@hproject.com',	true, '2024-08-05 00:00:00',	'2024-08-05 00:00:00',1);
-INSERT INTO public."user"(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('testing1',     'test',  'check', 'testing1@hproject.com',		true, '2024-08-05 00:00:00', 	'2024-08-05 00:00:00',2);
-INSERT INTO public."user"(username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('testing2',     'test',  'check', 'testing2@hproject.com', 		true, '2024-08-05 00:00:00', 	'2024-08-05 00:00:00',2);
+INSERT INTO public."user"(user_id, username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('01959b38-b3f9-7ec5-8ac8-e353bfe08a2d', 'hyunbin7303',  'kevin',    'park',  'hyunbin7303@gmail.com', 		true, '2024-08-05 00:00:00',  	'2024-08-05 00:00:00',1);
+INSERT INTO public."user"(user_id, username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('01959b39-febd-770d-9e1b-e5ee392fce54', 'macyhorvath17','macy',     'horvath',  'macyhorvath@gmail.com',	true, '2024-08-05 00:00:00',	'2024-08-05 00:00:00',1);
+INSERT INTO public."user"(user_id, username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('01959b3a-405b-7591-86dd-87174e2453fd', 'testing1',     'test',     'check', 'testing1@hproject.com',		true, '2024-08-05 00:00:00', 	'2024-08-05 00:00:00',2);
+INSERT INTO public."user"(user_id, username, first_name, last_name, email, is_active, created_at, updated_at, default_group_id) VALUES ('0195c388-d0f4-77d5-be90-971d38344c74 ','testing2',     'test',     'check', 'testing2@hproject.com', 		true, '2024-08-05 00:00:00', 	'2024-08-05 00:00:00',2);
 
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 1);
 INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES (1, 2);
