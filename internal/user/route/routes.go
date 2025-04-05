@@ -65,7 +65,26 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
-	utils.SuccessJson(w, user, "success", http.StatusOK)
+
+	userDetailDto := new(UserDetailDto)
+	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
+	if err != nil {
+		utils.ErrorJson(w, err, http.StatusBadRequest)
+		return
+	}
+	userDetailDto.Id = user.Id
+	userDetailDto.UserId = user.UserId
+	userDetailDto.UserName = user.UserName
+	userDetailDto.FirstName = user.FirstName
+	userDetailDto.LastName = user.LastName
+	userDetailDto.CreatedAt = user.CreatedAt
+	userDetailDto.UpdatedAt = user.UpdatedAt
+	userDetailDto.Email = user.Email
+	userDetailDto.IsActive = user.IsActive
+	userDetailDto.UserGroup = ugs
+	userDetailDto.DefaultGroupId = user.DefaultGroupId
+
+	utils.SuccessJson(w, userDetailDto, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
