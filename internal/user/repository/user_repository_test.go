@@ -12,6 +12,7 @@ import (
 func mockUserObj() model.User {
 	return model.User{
 		Id:             1,
+		UserId:         "01960938-573a-723d-a4ac-cf3bbe420ece",
 		UserName:       "testuser",
 		FirstName:      "kevin",
 		LastName:       "park",
@@ -23,8 +24,8 @@ func mockUserObj() model.User {
 	}
 }
 func mockUserRows(user model.User) *sqlmock.Rows {
-	return sqlmock.NewRows([]string{"id", "username", "first_name", "last_name", "email", "is_active", "created_at", "updated_at", "default_group_id"}).
-		AddRow(user.Id, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
+	return sqlmock.NewRows([]string{"id", "user_id", "username", "first_name", "last_name", "email", "is_active", "created_at", "updated_at", "default_group_id"}).
+		AddRow(user.Id, user.UserId, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
 }
 
 func TestUserRepo_GetAllUsers(t *testing.T) {
@@ -34,7 +35,7 @@ func TestUserRepo_GetAllUsers(t *testing.T) {
 	defer db.Close()
 	userRepo := NewUserRepository(db)
 
-	t.Run("Users Exists", func(t *testing.T) {
+	t.Run("Given single user, When Get All user, return single user", func(t *testing.T) {
 		mockUser := mockUserObj()
 		rows := mockUserRows(mockUser)
 		mock.ExpectQuery(sqlGetAllUsers).WillReturnRows(rows)
