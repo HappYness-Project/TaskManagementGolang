@@ -1,6 +1,7 @@
 package route
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -31,6 +32,7 @@ func (h *Handler) RegisterRoutes(router *chi.Mux) {
 		r.Post("/", h.handleCreateUser)
 		r.Put("/{userID}", h.handleUpdateUser)
 		r.Get("/{userID}", h.handleGetUser)
+		r.Patch("/{userID}/default-group", h.handleUpdateGroupId)
 	})
 	router.Get("/api/user-groups/{groupID}/users", h.handleGetUsersByGroupId)
 
@@ -203,4 +205,27 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	// TODO no success message is displayed.
 	utils.SuccessJson(w, nil, "User is updated.", http.StatusNoContent)
 
+}
+
+func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
+	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
+	if err != nil || user == nil {
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		return
+	}
+	type JsonBody struct {
+		DefaultGroupId int `json:"default_group_id"`
+	}
+	var jsonBody JsonBody
+	err = json.NewDecoder(r.Body).Decode(&jsonBody)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = h.userRepo.UpdateDefaultGroupId(user.Id, jsonBody.DefaultGroupId)
+	if err != nil {
+		utils.ErrorJson(w, err, http.StatusBadRequest)
+		return
+	}
+	utils.SuccessJson(w, nil, "Default user group ID is updated.", http.StatusOK)
 }

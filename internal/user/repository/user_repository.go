@@ -15,6 +15,7 @@ type UserRepository interface {
 	GetUsersByGroupId(groupId int) ([]*model.User, error)
 	CreateUser(user model.User) error
 	UpdateUser(user model.User) error
+	UpdateDefaultGroupId(Id int, groupId int) error
 }
 type UserRepo struct {
 	DB *sql.DB
@@ -129,6 +130,14 @@ func (m *UserRepo) CreateUser(user model.User) error {
 }
 func (m *UserRepo) UpdateUser(user model.User) error {
 	_, err := m.DB.Exec(sqlUpdateUser, user.Id, user.FirstName, user.LastName, user.Email, user.UpdatedAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *UserRepo) UpdateDefaultGroupId(Id int, groupId int) error {
+	_, err := m.DB.Exec(sqlUpdateDefaultGroupId, Id, groupId)
 	if err != nil {
 		return err
 	}
