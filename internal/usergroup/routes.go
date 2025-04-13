@@ -98,8 +98,7 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
-
-	utils.SuccessJson(w, nil, "User group is created.", http.StatusCreated)
+	utils.SuccessJson(w, map[string]int{"group_id": groupId}, "User group is created.", http.StatusCreated)
 }
 
 func ValidateNewUserGroup(req CreateUserGroupDto) error {
