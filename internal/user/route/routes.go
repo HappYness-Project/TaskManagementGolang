@@ -171,7 +171,7 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJson(w, fmt.Errorf("cannot create a user"), http.StatusBadRequest)
 		return
 	}
-	utils.SuccessJson(w, nil, "User is created.", http.StatusCreated)
+	utils.SuccessJson(w, map[string]string{"user_id": userId}, "User is created.", http.StatusCreated)
 }
 
 func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
