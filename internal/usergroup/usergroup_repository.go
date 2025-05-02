@@ -12,7 +12,7 @@ const dbTimeout = time.Second * 5
 type UserGroupRepository interface {
 	GetAllUsergroups() ([]*UserGroup, error)
 	GetById(id int) (*UserGroup, error)
-	GetUserGroupsByUserId(userId string) ([]*UserGroup, error)
+	GetUserGroupsByUserId(userId int) ([]*UserGroup, error)
 	CreateGroup(ug UserGroup) (int, error)
 	InsertUserGroupUserTable(groupId int, userId int) error
 	RemoveUserFromUserGroup(groupId int, userId int) error
@@ -64,11 +64,11 @@ func (m *UserGroupRepo) GetById(id int) (*UserGroup, error) {
 	}
 	return usergroup, err
 }
-func (m *UserGroupRepo) GetUserGroupsByUserId(userId string) ([]*UserGroup, error) {
+func (m *UserGroupRepo) GetUserGroupsByUserId(userIntId int) ([]*UserGroup, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
-	rows, err := m.DB.QueryContext(ctx, sqlGetUserGroupsByUserId, userId)
+	rows, err := m.DB.QueryContext(ctx, sqlGetUserGroupsByUserId, userIntId)
 	if err != nil {
 		return nil, err
 	}

@@ -117,7 +117,13 @@ func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Requ
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
 		return
 	}
-	groups, err := h.groupRepo.GetUserGroupsByUserId(userId)
+
+	user, err := h.userRepo.GetUserByUserId(userId)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user does not exist."))
+	}
+
+	groups, err := h.groupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error occurred during GetUserGroupsByUserId"))
 		return

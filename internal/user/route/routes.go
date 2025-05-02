@@ -69,7 +69,7 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userDetailDto := new(UserDetailDto)
-	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.UserId)
+	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
@@ -125,7 +125,7 @@ func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar 
 	}
 
 	userDetailDto := new(UserDetailDto)
-	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.UserId)
+	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
