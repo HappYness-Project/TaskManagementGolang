@@ -112,17 +112,11 @@ func ValidateNewUserGroup(req CreateUserGroupDto) error {
 }
 
 func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "userID")
-	if vars == "" {
+	userId := chi.URLParam(r, "userID")
+	if userId == "" {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
 		return
 	}
-	userId, err := strconv.Atoi(vars)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid user ID"))
-		return
-	}
-
 	groups, err := h.groupRepo.GetUserGroupsByUserId(userId)
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error occurred during GetUserGroupsByUserId"))
