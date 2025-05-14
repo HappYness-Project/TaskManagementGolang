@@ -1,4 +1,4 @@
-package usergroup
+package repository
 
 const (
 	sqlGetAllUsergroups      = `SELECT * FROM public.usergroup`
@@ -14,4 +14,6 @@ const (
 
 	sqlAddUserToUserGroup      = `INSERT INTO public.usergroup_user(usergroup_id, user_id) VALUES ($1, $2)`
 	sqlRemoveUserFromUserGroup = `DELETE FROM public.usergroup_user WHERE usergroup_id = $1 AND user_id = $2`
+
+	sqlDeleteUserGroup = `DELETE FROM public.usergroup WHERE id = $1`
 )

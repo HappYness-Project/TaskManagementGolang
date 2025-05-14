@@ -1,4 +1,4 @@
-package usergroup
+package route
 
 type CreateUserGroupDto struct {
 	GroupName string `json:"name"`

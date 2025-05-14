@@ -1,4 +1,4 @@
-package usergroup
+package model
 
 type UserGroup struct {
 	GroupId   int    `json:"id"`

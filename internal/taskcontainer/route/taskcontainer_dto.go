@@ -1,4 +1,4 @@
-package model
+package route
 
 type CreateContainerDto struct {
 	Name        string `json:"name"`

@@ -72,7 +72,7 @@ func (h *Handler) handleGetTaskContainersByGroupId(w http.ResponseWriter, r *htt
 	utils.WriteJsonWithEncode(w, http.StatusOK, containers)
 }
 func (h *Handler) handleCreateTaskContainer(w http.ResponseWriter, r *http.Request) {
-	var createDto model.CreateContainerDto
+	var createDto CreateContainerDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return

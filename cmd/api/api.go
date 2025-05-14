@@ -12,12 +12,12 @@ import (
 	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	usergroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 
 	taskRoute "github.com/happYness-Project/taskManagementGolang/internal/task/route"
 	containerRoute "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/route"
 	userRoute "github.com/happYness-Project/taskManagementGolang/internal/user/route"
-
-	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	usergroupRoute "github.com/happYness-Project/taskManagementGolang/internal/usergroup/route"
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/middlewares"
@@ -57,12 +57,12 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Get("/", home)
 
 	userRepo := userRepo.NewUserRepository(s.db)
-	usergroupRepo := usergroup.NewUserGroupRepository(s.db)
+	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db)
 	taskRepo := taskRepo.NewTaskRepository(s.db)
 	containerRepo := containerRepo.NewContainerRepository(s.db)
 
 	userHandler := userRoute.NewHandler(s.logger, userRepo, usergroupRepo)
-	usergroupHandler := usergroup.NewHandler(usergroupRepo, userRepo)
+	usergroupHandler := usergroupRoute.NewHandler(usergroupRepo, userRepo)
 	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
 	containerHandler := containerRoute.NewHandler(containerRepo, userRepo)
 

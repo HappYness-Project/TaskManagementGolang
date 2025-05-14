@@ -1,4 +1,4 @@
-package usergroup
+package route
 
 import (
 	"encoding/json"
@@ -9,21 +9,24 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
 	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
-	groupRepo UserGroupRepository
+	groupRepo repository.UserGroupRepository
 	userRepo  user.UserRepository
 }
 
-func NewHandler(repo UserGroupRepository, userRepo user.UserRepository) *Handler {
+func NewHandler(repo repository.UserGroupRepository, userRepo user.UserRepository) *Handler {
 	return &Handler{groupRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
 	router.Route("/api/user-groups", func(r chi.Router) {
 		r.Get("/", h.handleGetUserGroups)
 		r.Get("/{groupID}", h.handleGetUserGroupById)
+		r.Delete("/{groupID}", h.handleDeleteUserGroup)
 		r.Post("/{groupID}/users", h.handleAddUserToGroup)
 		r.Put("/{groupID}/users/{userID}", h.handleRemoveUserFromGroup)
 	})
@@ -81,7 +84,7 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	group := UserGroup{
+	group := model.UserGroup{
 		GroupName: createDto.GroupName,
 		GroupDesc: createDto.GroupDesc,
 		Type:      createDto.GroupType,
@@ -165,6 +168,21 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is added to the user group ID: %d", groupId))
+}
+
+func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
+	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		return
+	}
+
+	err = h.groupRepo.DeleteUserGroup(groupId)
+	if err != nil {
+		utils.ErrorJson(w, fmt.Errorf("failed to remove group"), 400)
+		return
+	}
+	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
 }
 
 func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Request) {

@@ -11,18 +11,19 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/user/repository"
-	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	userGroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
 	logger        *loggers.AppLogger
-	userRepo      repository.UserRepository
-	userGroupRepo usergroup.UserGroupRepository
+	userRepo      userRepo.UserRepository
+	userGroupRepo userGroupRepo.UserGroupRepository
 }
 
-func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRepo userGroupRepo.UserGroupRepository) *Handler {
 	return &Handler{userRepo: repo, userGroupRepo: ugRepo}
 }
 

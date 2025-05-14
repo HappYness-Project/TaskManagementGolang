@@ -12,7 +12,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/internal/task/model"
 	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
-	"github.com/happYness-Project/taskManagementGolang/internal/usergroup"
+	usergroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
@@ -21,10 +21,10 @@ type Handler struct {
 	logger        *loggers.AppLogger
 	taskRepo      taskRepo.TaskRepository
 	containerRepo containerRepo.ContainerRepository
-	groupRepo     usergroup.UserGroupRepository
+	groupRepo     usergroupRepo.UserGroupRepository
 }
 
-func NewHandler(logger *loggers.AppLogger, repo taskRepo.TaskRepository, tcRepo containerRepo.ContainerRepository, ugRepo usergroup.UserGroupRepository) *Handler {
+func NewHandler(logger *loggers.AppLogger, repo taskRepo.TaskRepository, tcRepo containerRepo.ContainerRepository, ugRepo usergroupRepo.UserGroupRepository) *Handler {
 	return &Handler{logger: logger, taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {

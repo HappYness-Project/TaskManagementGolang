@@ -1,21 +1,24 @@
-package usergroup
+package repository
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
 )
 
 const dbTimeout = time.Second * 5
 
 type UserGroupRepository interface {
-	GetAllUsergroups() ([]*UserGroup, error)
-	GetById(id int) (*UserGroup, error)
-	GetUserGroupsByUserId(userId int) ([]*UserGroup, error)
-	CreateGroup(ug UserGroup) (int, error)
+	GetAllUsergroups() ([]*model.UserGroup, error)
+	GetById(id int) (*model.UserGroup, error)
+	GetUserGroupsByUserId(userId int) ([]*model.UserGroup, error)
+	CreateGroup(ug model.UserGroup) (int, error)
 	InsertUserGroupUserTable(groupId int, userId int) error
 	RemoveUserFromUserGroup(groupId int, userId int) error
+	DeleteUserGroup(id int) error
 }
 type UserGroupRepo struct {
 	DB *sql.DB
@@ -27,7 +30,7 @@ func NewUserGroupRepository(db *sql.DB) *UserGroupRepo {
 	}
 }
 
-func (m *UserGroupRepo) GetAllUsergroups() ([]*UserGroup, error) {
+func (m *UserGroupRepo) GetAllUsergroups() ([]*model.UserGroup, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -37,7 +40,7 @@ func (m *UserGroupRepo) GetAllUsergroups() ([]*UserGroup, error) {
 	}
 	defer rows.Close()
 
-	var usergroups []*UserGroup
+	var usergroups []*model.UserGroup
 	for rows.Next() {
 		usergroup, err := scanRowsIntoUsergroup(rows)
 		if err != nil {
@@ -48,14 +51,14 @@ func (m *UserGroupRepo) GetAllUsergroups() ([]*UserGroup, error) {
 	}
 	return usergroups, nil
 }
-func (m *UserGroupRepo) GetById(id int) (*UserGroup, error) {
+func (m *UserGroupRepo) GetById(id int) (*model.UserGroup, error) {
 	rows, err := m.DB.Query(sqlGetById, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	usergroup := new(UserGroup)
+	usergroup := new(model.UserGroup)
 	for rows.Next() {
 		usergroup, err = scanRowsIntoUsergroup(rows)
 		if err != nil {
@@ -64,7 +67,7 @@ func (m *UserGroupRepo) GetById(id int) (*UserGroup, error) {
 	}
 	return usergroup, err
 }
-func (m *UserGroupRepo) GetUserGroupsByUserId(userIntId int) ([]*UserGroup, error) {
+func (m *UserGroupRepo) GetUserGroupsByUserId(userIntId int) ([]*model.UserGroup, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dbTimeout)
 	defer cancel()
 
@@ -74,7 +77,7 @@ func (m *UserGroupRepo) GetUserGroupsByUserId(userIntId int) ([]*UserGroup, erro
 	}
 	defer rows.Close()
 
-	var usergroups []*UserGroup
+	var usergroups []*model.UserGroup
 	for rows.Next() {
 		usergroup, err := scanRowsIntoUsergroup(rows)
 		if err != nil {
@@ -85,7 +88,7 @@ func (m *UserGroupRepo) GetUserGroupsByUserId(userIntId int) ([]*UserGroup, erro
 	}
 	return usergroups, nil
 }
-func (m *UserGroupRepo) CreateGroup(ug UserGroup) (int, error) {
+func (m *UserGroupRepo) CreateGroup(ug model.UserGroup) (int, error) {
 	lastInsertedId := 0
 	err := m.DB.QueryRow(sqlCreateUserGroup, ug.GroupName, ug.GroupDesc, ug.Type, ug.Thumbnail, ug.IsActive).Scan(&lastInsertedId)
 	if err != nil {
@@ -110,8 +113,16 @@ func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
 	return nil
 }
 
-func scanRowsIntoUsergroup(rows *sql.Rows) (*UserGroup, error) {
-	usergroup := new(UserGroup)
+func (m *UserGroupRepo) DeleteUserGroup(groupId int) error {
+	_, err := m.DB.Exec(sqlRemoveUserFromUserGroup, groupId)
+	if err != nil {
+		return fmt.Errorf("unable to delete user from usergroup_user table : %w", err)
+	}
+	return nil
+}
+
+func scanRowsIntoUsergroup(rows *sql.Rows) (*model.UserGroup, error) {
+	usergroup := new(model.UserGroup)
 	err := rows.Scan(
 		&usergroup.GroupId,
 		&usergroup.GroupName,
