@@ -114,9 +114,9 @@ func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
 }
 
 func (m *UserGroupRepo) DeleteUserGroup(groupId int) error {
-	_, err := m.DB.Exec(sqlRemoveUserFromUserGroup, groupId)
+	_, err := m.DB.Exec(sqlDeleteUserGroup, groupId)
 	if err != nil {
-		return fmt.Errorf("unable to delete user from usergroup_user table : %w", err)
+		return fmt.Errorf("unable to delete usergroup table : %w", err)
 	}
 	return nil
 }

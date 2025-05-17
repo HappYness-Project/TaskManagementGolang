@@ -64,13 +64,12 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	_, claims, _ := jwtauth.FromContext(r.Context())
 	var createDto *CreateUserGroupDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
 		return
 	}
-
+	_, claims, _ := jwtauth.FromContext(r.Context())
 	userid := fmt.Sprintf("%v", claims["nameid"])
 	user, err := h.userRepo.GetUserByUserId(userid)
 	if err != nil || user == nil {
@@ -171,9 +170,22 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
+
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	userid := fmt.Sprintf("%v", claims["nameid"])
+	user, err := h.userRepo.GetUserByUserId(userid)
+	if err != nil || user == nil {
+		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		return
+	}
 	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		return
+	}
+	err = h.groupRepo.RemoveUserFromUserGroup(groupId, user.Id)
+	if err != nil {
+		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
 		return
 	}
 
