@@ -106,9 +106,13 @@ func (m *UserGroupRepo) InsertUserGroupUserTable(groupId int, userId int) error 
 }
 
 func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
-	_, err := m.DB.Exec(sqlRemoveUserFromUserGroup, groupId, userId)
+	result, err := m.DB.Exec(sqlRemoveUserFromUserGroup, groupId, userId)
 	if err != nil {
 		return fmt.Errorf("unable to delete user from usergroup_user table : %w", err)
+	}
+	id, _ := result.RowsAffected()
+	if id == 0 {
+		return fmt.Errorf("none of the data has been removed")
 	}
 	return nil
 }

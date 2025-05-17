@@ -180,12 +180,12 @@ func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) 
 	}
 	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		utils.ErrorJson(w, fmt.Errorf("invalid Group ID"), http.StatusBadRequest)
 		return
 	}
 	err = h.groupRepo.RemoveUserFromUserGroup(groupId, user.Id)
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 
