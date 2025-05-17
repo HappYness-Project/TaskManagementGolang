@@ -112,15 +112,19 @@ func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
 	}
 	id, _ := result.RowsAffected()
 	if id == 0 {
-		return fmt.Errorf("none of the data has been removed")
+		fmt.Printf("none of the data has been removed")
 	}
 	return nil
 }
 
 func (m *UserGroupRepo) DeleteUserGroup(groupId int) error {
-	_, err := m.DB.Exec(sqlDeleteUserGroup, groupId)
+	result, err := m.DB.Exec(sqlDeleteUserGroup, groupId)
 	if err != nil {
 		return fmt.Errorf("unable to delete usergroup table : %w", err)
+	}
+	row, _ := result.RowsAffected()
+	if row == 0 {
+		return fmt.Errorf("none of the usergroup has been removed")
 	}
 	return nil
 }

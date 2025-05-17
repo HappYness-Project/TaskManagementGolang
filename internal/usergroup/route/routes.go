@@ -191,7 +191,7 @@ func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) 
 
 	err = h.groupRepo.DeleteUserGroup(groupId)
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("failed to remove group"), 400)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
