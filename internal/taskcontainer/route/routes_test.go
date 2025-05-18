@@ -67,6 +67,9 @@ func (m *mockContainerRepo) CreateContainer(c model.TaskContainer) error {
 func (m *mockContainerRepo) DeleteContainer(id string) error {
 	return nil
 }
+func (m *mockContainerRepo) RemoveContainerByUsergroupId(groupId int) error {
+	return nil
+}
 
 type mockUserRepo struct{}
 

@@ -17,6 +17,7 @@ type ContainerRepository interface {
 	GetContainersByGroupId(groupId int) ([]model.TaskContainer, error)
 	CreateContainer(container model.TaskContainer) error
 	DeleteContainer(id string) error
+	RemoveContainerByUsergroupId(groupId int) error
 }
 
 type ContainerRepo struct {
@@ -101,6 +102,14 @@ func (m *ContainerRepo) DeleteContainer(id string) error {
 	_, err := m.DB.Exec(sqlDeleteContainer, id)
 	if err != nil {
 		return fmt.Errorf("unable to remove task container : %w", err)
+	}
+	return nil
+}
+
+func (m *ContainerRepo) RemoveContainerByUsergroupId(groupId int) error {
+	_, err := m.DB.Exec(sqlDeleteContainerByUsergroupId, groupId)
+	if err != nil {
+		return fmt.Errorf("unable to remove container by usergroup Id : %w", err)
 	}
 	return nil
 }

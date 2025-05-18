@@ -8,18 +8,22 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
-	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
+	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	userGroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
+
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
-	groupRepo repository.UserGroupRepository
-	userRepo  user.UserRepository
+	groupRepo     userGroupRepo.UserGroupRepository
+	userRepo      userRepo.UserRepository
+	containerRepo containerRepo.ContainerRepository
 }
 
-func NewHandler(repo repository.UserGroupRepository, userRepo user.UserRepository) *Handler {
+func NewHandler(repo repository.UserGroupRepository, userRepo userRepo.UserRepository) *Handler {
 	return &Handler{groupRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
@@ -170,25 +174,11 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
-
-	_, claims, _ := jwtauth.FromContext(r.Context())
-	userid := fmt.Sprintf("%v", claims["nameid"])
-	user, err := h.userRepo.GetUserByUserId(userid)
-	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
-		return
-	}
 	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
 		utils.ErrorJson(w, fmt.Errorf("invalid Group ID"), http.StatusBadRequest)
 		return
 	}
-	err = h.groupRepo.RemoveUserFromUserGroup(groupId, user.Id)
-	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
-		return
-	}
-
 	err = h.groupRepo.DeleteUserGroup(groupId)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
