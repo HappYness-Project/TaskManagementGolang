@@ -90,26 +90,23 @@ CREATE TABLE IF NOT EXISTS public.taskcontainer (
     usergroup_id bigint,
     CONSTRAINT pk_taskcontainer PRIMARY KEY (id),
     CONSTRAINT fk_usergroup_id_taskcontainer_usergroupId FOREIGN KEY (usergroup_id)
-        REFERENCES public.usergroup (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        DEFERRABLE INITIALLY DEFERRED
+        REFERENCES public.usergroup ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS public.taskcontainer_task (
   taskcontainer_id uuid NOT NULL,
   task_id uuid NOT NULL,
   PRIMARY KEY (taskcontainer_id, task_id),
-  CONSTRAINT fk_taskcontainer_task_taskcontainer_id FOREIGN KEY(taskcontainer_id) REFERENCES public.taskcontainer(id),
-  CONSTRAINT fk_taskcontainer_task_task_id FOREIGN KEY(task_id) REFERENCES public.task(id)
+  CONSTRAINT fk_taskcontainer_task_taskcontainer_id FOREIGN KEY(taskcontainer_id) REFERENCES public.taskcontainer(id) ON DELETE CASCADE,
+  CONSTRAINT fk_taskcontainer_task_task_id FOREIGN KEY(task_id) REFERENCES public.task(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS public.usergroup_user (
   usergroup_id bigint NOT NULL,
   user_id bigint NOT NULL,
   PRIMARY KEY (usergroup_id, user_id),
-  CONSTRAINT fk_usergroup_user_usergroup_id FOREIGN KEY(usergroup_id) REFERENCES public.usergroup(id),
-  CONSTRAINT fk_usergroup_user_user_id FOREIGN KEY(user_id) REFERENCES public.user(id)
+  CONSTRAINT fk_usergroup_user_usergroup_id FOREIGN KEY(usergroup_id) REFERENCES public.usergroup(id) ON DELETE CASCADE,
+  CONSTRAINT fk_usergroup_user_user_id FOREIGN KEY(user_id) REFERENCES public.user(id) ON DELETE CASCADE
 );
 
 INSERT INTO public."usergroup"(id, name, description, type, thumbnailurl, is_active) OVERRIDING SYSTEM VALUE VALUES (1, 'user group #1', 'Description for user group 1', 'normal', '', true);
