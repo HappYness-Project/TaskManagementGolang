@@ -1,5 +1,7 @@
 package route
 
+import "errors"
+
 const prefix = "users_"
 
 const UnexpectedErrMsg = "unexpected error occurred."
@@ -13,4 +15,8 @@ const (
 	UserCreateInvalidInput = prefix + "create_invalid_input"
 	UserCreateUnauthorized = prefix + "create_unauthorized"
 	UserCreateServerError  = prefix + "create_server_error"
+)
+
+var (
+	CreateUserError = errors.New("cannot create a user")
 )

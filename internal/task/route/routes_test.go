@@ -1,20 +1,13 @@
 package route
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-	"github.com/happYness-Project/taskManagementGolang/internal/task/model"
-)
-
 // func TestTaskHandler(t *testing.T) {
-// 	repo := &mockTaskRepo{}
-// 	containerRepo := &mockContainerRepo{}
+// 	mockTaskRepo := new(mocks.TaskRepository)
+// 	mockContainerRepo := new(mocks.ContainerRepository)
 
 // 	env := configs.Env{}
 // 	logger := loggers.Setup(env)
 
-// 	handler := NewHandler(logger, repo, containerRepo, nil)
+// 	handler := NewHandler(logger, mockTaskRepo, mockContainerRepo, nil)
 
 // 	t.Run("when get all tasks, Then return status code 200 with tasks", func(t *testing.T) {
 // 		req, _ := http.NewRequest(http.MethodGet, "/api/tasks", nil)
@@ -29,6 +22,8 @@ import (
 // 		require.NoError(t, err)
 // 		assert.NotNil(t, tasks)
 // 	})
+// }
+
 // 	t.Run("when get task by id, Then return status code 200", func(t *testing.T) {
 // 		req, err := http.NewRequest(http.MethodGet, "/api/tasks/abcd", nil)
 // 		if err != nil {
@@ -148,61 +143,15 @@ import (
 // 	})
 // }
 
-type mockTaskRepo struct{}
+// func (m *mockTaskRepo) GetAllTasks() ([]model.Task, error) {
+// 	var mockTasks = []model.Task{
+// 		{TaskId: uuid.New().String(), TaskName: "TaskName #1", TaskDesc: "Task Desc #1", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*1)},
+// 		{TaskId: uuid.New().String(), TaskName: "TaskName #2", TaskDesc: "Task Desc #2", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*2)},
+// 		{TaskId: uuid.New().String(), TaskName: "TaskName #3", TaskDesc: "Task Desc #3", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*3)},
+// 	}
+// 	return mockTasks, nil
+// }
 
-func (m *mockTaskRepo) GetAllTasks() ([]model.Task, error) {
-	var mockTasks = []model.Task{
-		{TaskId: uuid.New().String(), TaskName: "TaskName #1", TaskDesc: "Task Desc #1", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*1)},
-		{TaskId: uuid.New().String(), TaskName: "TaskName #2", TaskDesc: "Task Desc #2", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*2)},
-		{TaskId: uuid.New().String(), TaskName: "TaskName #3", TaskDesc: "Task Desc #3", TaskType: "", TargetDate: time.Now().AddDate(0, 0, 7*3)},
-	}
-	return mockTasks, nil
-}
-func (m *mockTaskRepo) GetTaskById(id string) (*model.Task, error) {
-	return &model.Task{}, nil
-}
-func (m *mockTaskRepo) GetTasksByContainerId(containerId string) ([]model.Task, error) {
-	return []model.Task{}, nil
-}
-func (m *mockTaskRepo) CreateTask(containerId string, req model.Task) (model.Task, error) {
-	return model.Task{}, nil
-}
-func (m *mockTaskRepo) UpdateTask(task model.Task) error {
-	return nil
-}
-func (m *mockTaskRepo) DeleteTask(id string) error {
-	return nil
-}
-func (m *mockTaskRepo) DoneTask(id string, isDone bool) error {
-	return nil
-}
-func (m *mockTaskRepo) UpdateImportantTask(id string, isImportant bool) error {
-	return nil
-}
-func (m *mockTaskRepo) GetAllTasksByGroupId(groupId int) ([]model.Task, error) {
-	return []model.Task{}, nil
-}
-func (m *mockTaskRepo) GetAllTasksByGroupIdOnlyImportant(groupId int) ([]model.Task, error) {
-	return []model.Task{}, nil
-}
-
-// type mockContainerRepo struct{}
-
-// func (m *mockContainerRepo) AllTaskContainers() ([]*model.TaskContainer, error) {
-// 	return []*TaskContainer{}, nil
-// }
-// func (m *mockContainerRepo) GetById(id string) (*TaskContainer, error) {
-// 	return &TaskContainer{}, nil
-// }
-// func (m *mockContainerRepo) GetContainersByGroupId(groupId int) ([]TaskContainer, error) {
-// 	return []TaskContainer{}, nil
-// }
-// func (m *mockContainerRepo) CreateContainer(container TaskContainer) error {
-// 	return nil
-// }
-// func (m *mockContainerRepo) DeleteContainer(id string) error {
-// 	return nil
-// }
 // func assertStatus(t testing.TB, got, want int) {
 // 	t.Helper()
 // 	if got != want {

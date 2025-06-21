@@ -60,11 +60,12 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil {
-		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).Msg("Error occurred during retrieving user.")
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetServerError).Msg("Error occurred during retrieving user.")
 		utils.ErrorJson(w, err, http.StatusInternalServerError)
 		return
 	}
 	if user == nil {
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound)
 		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
 		return
 	}
@@ -72,6 +73,7 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	userDetailDto := new(UserDetailDto)
 	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
+		h.logger.Error().Err(err).Msg("Bad Request")
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}

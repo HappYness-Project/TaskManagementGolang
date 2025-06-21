@@ -55,6 +55,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(jwtauth.Verifier(s.tokenAuth))
 	mux.Use(jwtauth.Authenticator)
 	mux.Get("/", home)
+	mux.Get("/health", home)
 
 	userRepo := userRepo.NewUserRepository(s.db)
 	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db)
