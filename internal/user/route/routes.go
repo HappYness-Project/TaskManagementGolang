@@ -24,7 +24,7 @@ type Handler struct {
 }
 
 func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRepo userGroupRepo.UserGroupRepository) *Handler {
-	return &Handler{userRepo: repo, userGroupRepo: ugRepo}
+	return &Handler{logger: logger, userRepo: repo, userGroupRepo: ugRepo}
 }
 
 func (h *Handler) RegisterRoutes(router *chi.Mux) {
