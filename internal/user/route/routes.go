@@ -109,7 +109,6 @@ func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request
 	}
 	utils.SuccessJson(w, user, "success", http.StatusOK)
 }
-
 func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar string) {
 	var user *model.User
 	var err error
@@ -147,7 +146,6 @@ func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar 
 
 	utils.SuccessJson(w, userDetailDto, "success", http.StatusOK)
 }
-
 func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
@@ -157,26 +155,15 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	userId := fmt.Sprintf("%v", claims["nameid"])
 
-	user := model.User{
-		UserId:         userId,
-		UserName:       createDto.UserName,
-		FirstName:      createDto.FirstName,
-		LastName:       createDto.LastName,
-		Email:          createDto.Email,
-		IsActive:       true,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-		DefaultGroupId: 0,
-	}
+	user := model.NewUser(userId, createDto.UserName, createDto.FirstName, createDto.LastName, createDto.Email)
 
-	err := h.userRepo.CreateUser(user)
+	err := h.userRepo.CreateUser(*user)
 	if err != nil {
 		utils.ErrorJson(w, fmt.Errorf("cannot create a user"), http.StatusBadRequest)
 		return
 	}
 	utils.SuccessJson(w, map[string]string{"user_id": userId}, "User is created.", http.StatusCreated)
 }
-
 func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateDto UpdateUserDto
 	if err := utils.ParseJson(r, &updateDto); err != nil {
@@ -216,6 +203,7 @@ func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
+
 	type JsonBody struct {
 		DefaultGroupId int `json:"default_group_id"`
 	}
@@ -225,10 +213,18 @@ func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = h.userRepo.UpdateDefaultGroupId(user.Id, jsonBody.DefaultGroupId)
+
+	err = user.UpdateDefaultGroupId(jsonBody.DefaultGroupId)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
+
+	err = h.userRepo.UpdateUser(*user)
+	if err != nil {
+		utils.ErrorJson(w, err, http.StatusBadRequest)
+		return
+	}
+
 	utils.SuccessJson(w, nil, "Default user group ID is updated.", http.StatusOK)
 }
