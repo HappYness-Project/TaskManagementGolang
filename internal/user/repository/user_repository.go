@@ -128,7 +128,7 @@ func (m *UserRepo) CreateUser(user model.User) error {
 	return nil
 }
 func (m *UserRepo) UpdateUser(user model.User) error {
-	_, err := m.DB.Exec(sqlUpdateUser, user.Id, user.FirstName, user.LastName, user.Email, user.UpdatedAt)
+	_, err := m.DB.Exec(sqlUpdateUser, user.Id, user.FirstName, user.LastName, user.Email, user.DefaultGroupId, user.UpdatedAt)
 	if err != nil {
 		return err
 	}
