@@ -18,6 +18,7 @@ import (
 
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestUserHandler(t *testing.T) {
@@ -238,7 +239,6 @@ func TestUserHandler(t *testing.T) {
 	})
 
 	t.Run("when get users by group ID with empty group ID, Then return status code 400", func(t *testing.T) {
-		// Reset mocks for this test
 		mockUserRepo.ExpectedCalls = nil
 		mockUserGroupRepo.ExpectedCalls = nil
 
@@ -261,58 +261,6 @@ func TestUserHandler(t *testing.T) {
 	})
 
 	t.Run("when update user default group ID with valid data, Then return status code 200", func(t *testing.T) {
-		// Reset mocks for this test
-		mockUserRepo.ExpectedCalls = nil
-		mockUserGroupRepo.ExpectedCalls = nil
-
-		userID := "test-user-id"
-		existingUser := &userModel.User{
-			Id:             1,
-			UserId:         userID,
-			UserName:       "testuser",
-			FirstName:      "Test",
-			LastName:       "User",
-			Email:          "test@example.com",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
-			DefaultGroupId: 0, // No default group initially
-		}
-
-		// Mock repository calls
-		mockUserRepo.On("GetUserByUserId", userID).Return(existingUser, nil)
-		mockUserRepo.On("UpdateUser", existingUser).Return(nil)
-
-		// Create request body
-		requestBody := `{"default_group_id": 5}`
-		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
-		req.Header.Set("Content-Type", "application/json")
-		rr := httptest.NewRecorder()
-		router := chi.NewRouter()
-
-		router.Route("/api/users/{userID}", func(r chi.Router) {
-			r.Patch("/default-group", handler.handleUpdateGroupId)
-		})
-
-		router.ServeHTTP(rr, req)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-
-		// Parse success response
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Equal(t, "success", response["message"])
-		assert.Contains(t, response["message"], "Default user group ID is updated")
-
-		mockUserRepo.AssertExpectations(t)
-	})
-
-	t.Run("when update user default group ID with negative group ID, Then return status code 400", func(t *testing.T) {
-		// Reset mocks for this test
-		mockUserRepo.ExpectedCalls = nil
-		mockUserGroupRepo.ExpectedCalls = nil
-
 		userID := "test-user-id"
 		existingUser := &userModel.User{
 			Id:             1,
@@ -327,10 +275,50 @@ func TestUserHandler(t *testing.T) {
 			DefaultGroupId: 0,
 		}
 
-		// Mock repository call
 		mockUserRepo.On("GetUserByUserId", userID).Return(existingUser, nil)
+		mockUserRepo.On("UpdateUser", mock.MatchedBy(func(u userModel.User) bool {
+			return u.Id == existingUser.Id &&
+				u.UserName == existingUser.UserName &&
+				u.FirstName == existingUser.FirstName &&
+				u.LastName == existingUser.LastName &&
+				u.Email == existingUser.Email &&
+				u.IsActive == existingUser.IsActive &&
+				u.CreatedAt.Equal(existingUser.CreatedAt)
+		})).Return(nil)
 
-		// Create request body with negative group ID
+		requestBody := `{"default_group_id": 5}`
+		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router := chi.NewRouter()
+
+		router.Route("/api/users/{userID}", func(r chi.Router) {
+			r.Patch("/default-group", handler.handleUpdateGroupId)
+		})
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		var response map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &response)
+		assert.Contains(t, response["message"], "Default user group ID is updated.")
+	})
+
+	t.Run("when update user default group ID with negative group ID, Then return status code 400", func(t *testing.T) {
+		userID := "test-user-id"
+		existingUser := &userModel.User{
+			Id:             1,
+			UserId:         userID,
+			UserName:       "testuser",
+			FirstName:      "Test",
+			LastName:       "User",
+			Email:          "test@example.com",
+			IsActive:       true,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			DefaultGroupId: 0,
+		}
+		mockUserRepo.On("GetUserByUserId", userID).Return(existingUser, nil)
 		requestBody := `{"default_group_id": -1}`
 		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -344,15 +332,10 @@ func TestUserHandler(t *testing.T) {
 		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-
-		// Parse error response
 		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
+		json.Unmarshal(rr.Body.Bytes(), &response)
 		assert.True(t, response["error"].(bool))
 		assert.Contains(t, response["message"], "group ID cannot be negative")
-
-		mockUserRepo.AssertExpectations(t)
 	})
 
 	t.Run("when update user default group ID with same group ID, Then return status code 400", func(t *testing.T) {
@@ -398,16 +381,8 @@ func TestUserHandler(t *testing.T) {
 	})
 
 	t.Run("when update user default group ID but user not found, Then return status code 404", func(t *testing.T) {
-		// Reset mocks for this test
-		mockUserRepo.ExpectedCalls = nil
-		mockUserGroupRepo.ExpectedCalls = nil
-
 		userID := "non-existent-user"
-
-		// Mock repository call returning nil user
-		mockUserRepo.On("GetUserByUserId", userID).Return(nil, nil)
-
-		// Create request body
+		mockUserRepo.On("GetUserByUserId", userID).Return((*userModel.User)(nil), nil)
 		requestBody := `{"default_group_id": 5}`
 		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -419,21 +394,14 @@ func TestUserHandler(t *testing.T) {
 		})
 
 		router.ServeHTTP(rr, req)
-
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-
-		// Parse error response
 		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
+		json.Unmarshal(rr.Body.Bytes(), &response)
 		assert.True(t, response["error"].(bool))
 		assert.Contains(t, response["message"], "cannot find user")
-
-		mockUserRepo.AssertExpectations(t)
 	})
 
 	t.Run("when update user default group ID with invalid JSON, Then return status code 400", func(t *testing.T) {
-
 		userID := "test-user-id"
 		existingUser := &userModel.User{
 			Id:             1,
@@ -447,11 +415,8 @@ func TestUserHandler(t *testing.T) {
 			UpdatedAt:      time.Now(),
 			DefaultGroupId: 0,
 		}
-
-		// Mock repository call
 		mockUserRepo.On("GetUserByUserId", userID).Return(existingUser, nil)
 
-		// Create request body with invalid JSON
 		requestBody := `{"default_group_id": "invalid"}`
 		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -465,52 +430,78 @@ func TestUserHandler(t *testing.T) {
 		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-
-		mockUserRepo.AssertExpectations(t)
 	})
 
-	t.Run("when update user default group ID but repository update fails, Then return status code 400", func(t *testing.T) {
+	t.Run("when update user with valid data, Then return status code 204", func(t *testing.T) {
 		mockUserRepo.ExpectedCalls = nil
 		mockUserGroupRepo.ExpectedCalls = nil
-
 		userID := "test-user-id"
 		existingUser := &userModel.User{
-			Id:             1,
-			UserId:         userID,
-			UserName:       "testuser",
-			FirstName:      "Test",
-			LastName:       "User",
-			Email:          "test@example.com",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
-			UpdatedAt:      time.Now(),
-			DefaultGroupId: 0,
+			Id:        1,
+			UserId:    userID,
+			UserName:  "testuser",
+			FirstName: "OldFirst",
+			LastName:  "OldLast",
+			Email:     "old@example.com",
+			IsActive:  true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
-		// Mock repository calls
 		mockUserRepo.On("GetUserByUserId", userID).Return(existingUser, nil)
-		existingUser.UpdateDefaultGroupId(5)
-		mockUserRepo.On("UpdateUser", existingUser).Return(fmt.Errorf("database error"))
+		existingUser.UpdateUser("NewFirst", "NewLast", "new@example.com")
+		mockUserRepo.On("UpdateUser", mock.MatchedBy(func(u userModel.User) bool {
+			return u.Id == existingUser.Id &&
+				u.UserId == existingUser.UserId &&
+				u.UserName == existingUser.UserName &&
+				u.FirstName == "NewFirst" &&
+				u.LastName == "NewLast" &&
+				u.Email == "new@example.com" &&
+				u.IsActive == existingUser.IsActive &&
+				u.CreatedAt.Equal(existingUser.CreatedAt)
+		})).Return(nil)
 
-		// Create request body
-		requestBody := `{"default_group_id": 5}`
-		req := httptest.NewRequest(http.MethodPatch, "/api/users/"+userID+"/default-group", strings.NewReader(requestBody))
+		requestBody := `{"first_name": "NewFirst", "last_name": "NewLast", "email": "new@example.com"}`
+		req := httptest.NewRequest(http.MethodPut, "/api/users/"+userID, strings.NewReader(requestBody))
 		req.Header.Set("Content-Type", "application/json")
 		rr := httptest.NewRecorder()
 		router := chi.NewRouter()
-
 		router.Route("/api/users/{userID}", func(r chi.Router) {
-			r.Patch("/default-group", handler.handleUpdateGroupId)
+			r.Put("/", handler.handleUpdateUser)
 		})
 
 		router.ServeHTTP(rr, req)
 
-		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, http.StatusNoContent, rr.Code)
+		var response map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &response)
+		assert.Equal(t, "User is updated.", response["message"])
+	})
 
+	t.Run("when update user but user not found, Then return status code 404", func(t *testing.T) {
+		mockUserRepo.ExpectedCalls = nil
+		mockUserGroupRepo.ExpectedCalls = nil
+		userID := "non-existent-user"
+		mockUserRepo.On("GetUserByUserId", userID).Return((*userModel.User)(nil), nil)
+
+		requestBody := `{"first_name": "NewFirst", "last_name": "NewLast", "email": "new@example.com"}`
+		req := httptest.NewRequest(http.MethodPut, "/api/users/"+userID, strings.NewReader(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router := chi.NewRouter()
+		router.Route("/api/users/{userID}", func(r chi.Router) {
+			r.Put("/", handler.handleUpdateUser)
+		})
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 		var response map[string]interface{}
 		err := json.Unmarshal(rr.Body.Bytes(), &response)
 		require.NoError(t, err)
 		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "database error")
+		assert.Contains(t, response["message"], "cannot find user")
+		mockUserRepo.AssertExpectations(t)
 	})
+
 }

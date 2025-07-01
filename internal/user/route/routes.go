@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
@@ -176,25 +175,15 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
 		return
 	}
-	updatedUser := model.User{
-		Id:        user.Id,
-		UserId:    user.UserId,
-		UserName:  user.UserName,
-		FirstName: updateDto.FirstName,
-		LastName:  updateDto.LastName,
-		Email:     updateDto.Email,
-		IsActive:  true,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: time.Now(),
-	}
-	err = h.userRepo.UpdateUser(updatedUser)
+
+	user.UpdateUser(updateDto.FirstName, updateDto.LastName, updateDto.Email)
+
+	err = h.userRepo.UpdateUser(*user)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
-	// TODO no success message is displayed.
 	utils.SuccessJson(w, nil, "User is updated.", http.StatusNoContent)
-
 }
 
 func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
@@ -210,7 +199,7 @@ func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
 	var jsonBody JsonBody
 	err = json.NewDecoder(r.Body).Decode(&jsonBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 

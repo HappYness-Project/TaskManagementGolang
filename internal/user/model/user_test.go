@@ -286,3 +286,18 @@ func TestClearDefaultGroup(t *testing.T) {
 		assert.True(t, user.UpdatedAt.After(originalUpdatedAt))
 	})
 }
+
+func TestUpdateUser(t *testing.T) {
+	t.Run("when updating user fields, Then fields and UpdatedAt are updated", func(t *testing.T) {
+		user := NewUser("test-user", "testuser", "OldFirst", "OldLast", "old@example.com")
+		originalUpdatedAt := user.UpdatedAt
+		time.Sleep(1 * time.Millisecond) // Ensure UpdatedAt changes
+
+		user.UpdateUser("NewFirst", "NewLast", "new@example.com")
+
+		assert.Equal(t, "NewFirst", user.FirstName)
+		assert.Equal(t, "NewLast", user.LastName)
+		assert.Equal(t, "new@example.com", user.Email)
+		assert.True(t, user.UpdatedAt.After(originalUpdatedAt))
+	})
+}

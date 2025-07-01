@@ -53,3 +53,10 @@ func (u *User) ClearDefaultGroup() {
 	u.DefaultGroupId = 0
 	u.UpdatedAt = time.Now()
 }
+
+func (u *User) UpdateUser(firstName, lastName, email string) {
+	u.FirstName = firstName
+	u.LastName = lastName
+	u.Email = email
+	u.UpdatedAt = time.Now()
+}
