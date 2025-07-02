@@ -67,8 +67,9 @@ func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request)
 	utils.WriteJsonWithEncode(w, http.StatusOK, group)
 }
 
+// TODO List Testing this method
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	var createDto *CreateUserGroupDto
+	var createDto CreateUserGroupDto
 	if err := utils.ParseJson(r, &createDto); err != nil {
 		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
 		return
@@ -81,40 +82,19 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = ValidateNewUserGroup(*createDto)
+	group, err := model.NewUserGroup(createDto.GroupName, createDto.GroupDesc, createDto.GroupType)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
 
-	group := model.UserGroup{
-		GroupName: createDto.GroupName,
-		GroupDesc: createDto.GroupDesc,
-		Type:      createDto.GroupType,
-		IsActive:  true,
-		Thumbnail: "",
-	}
-	groupId, err := h.groupRepo.CreateGroup(group)
+	groupId, err := h.groupRepo.CreateGroupWithUsers(*group, user.Id)
 	if err != nil {
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
-	err = h.groupRepo.InsertUserGroupUserTable(groupId, user.Id)
-	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
-		return
-	}
+
 	utils.SuccessJson(w, map[string]int{"group_id": groupId}, "User group is created.", http.StatusCreated)
-}
-
-func ValidateNewUserGroup(req CreateUserGroupDto) error {
-	if req.GroupName == "" {
-		return fmt.Errorf("GroupName field cannot be empty")
-	}
-	if req.GroupType == "" {
-		return fmt.Errorf("GroupType field cannot be empty")
-	}
-	return nil
 }
 
 func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Request) {

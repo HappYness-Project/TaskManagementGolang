@@ -7,12 +7,6 @@ import (
 
 type MockUserGroupRepo struct{ mock.Mock }
 
-// CreateGroup implements repository.UserGroupRepository.
-func (m *MockUserGroupRepo) CreateGroup(ug model.UserGroup) (int, error) {
-	args := m.Called(ug)
-	return args.Get(0).(int), args.Error(1)
-}
-
 // DeleteUserGroup implements repository.UserGroupRepository.
 func (m *MockUserGroupRepo) DeleteUserGroup(id int) error {
 	args := m.Called(id)
@@ -43,8 +37,11 @@ func (m *MockUserGroupRepo) InsertUserGroupUserTable(groupId int, userId int) er
 	return args.Error(0)
 }
 
-// RemoveUserFromUserGroup implements repository.UserGroupRepository.
 func (m *MockUserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
 	args := m.Called(groupId, userId)
 	return args.Error(0)
+}
+func (m *MockUserGroupRepo) CreateGroupWithUsers(ug model.UserGroup, userId int) (int, error) {
+	args := m.Called(ug, userId)
+	return args.Get(0).(int), args.Error(0)
 }

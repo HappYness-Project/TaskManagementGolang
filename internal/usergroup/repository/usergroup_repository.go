@@ -15,7 +15,7 @@ type UserGroupRepository interface {
 	GetAllUsergroups() ([]*model.UserGroup, error)
 	GetById(id int) (*model.UserGroup, error)
 	GetUserGroupsByUserId(userId int) ([]*model.UserGroup, error)
-	CreateGroup(ug model.UserGroup) (int, error)
+	CreateGroupWithUsers(ug model.UserGroup, userId int) (int, error)
 	InsertUserGroupUserTable(groupId int, userId int) error
 	RemoveUserFromUserGroup(groupId int, userId int) error
 	DeleteUserGroup(id int) error
@@ -97,6 +97,32 @@ func (m *UserGroupRepo) CreateGroup(ug model.UserGroup) (int, error) {
 
 	return lastInsertedId, nil
 }
+func (m *UserGroupRepo) CreateGroupWithUsers(ug model.UserGroup, userId int) (int, error) {
+	tx, err := m.DB.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+	lastInsertedId := 0
+	err = tx.QueryRow(sqlCreateUserGroup, ug.GroupName, ug.GroupDesc, ug.Type, ug.Thumbnail, ug.IsActive).Scan(&lastInsertedId)
+	if err != nil {
+		return 0, fmt.Errorf("unable to insert into usergroup table : %w", err)
+	}
+
+	_, err = tx.Exec(sqlAddUserToUserGroup, lastInsertedId, userId)
+	if err != nil {
+		return 0, err
+	}
+	if err = tx.Commit(); err != nil {
+		return 0, err
+	}
+	return lastInsertedId, nil
+}
+
 func (m *UserGroupRepo) InsertUserGroupUserTable(groupId int, userId int) error {
 	_, err := m.DB.Exec(sqlAddUserToUserGroup, groupId, userId)
 	if err != nil {
