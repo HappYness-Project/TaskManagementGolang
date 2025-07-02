@@ -21,7 +21,7 @@ type Handler struct {
 func NewHandler(repo container.ContainerRepository, userRepo user.UserRepository) *Handler {
 	return &Handler{containerRepo: repo, userRepo: userRepo}
 }
-func (h *Handler) RegisterRoutes(router *chi.Mux) {
+func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/task-containers", func(r chi.Router) {
 		r.Post("/", h.handleCreateTaskContainer)
 		r.Get("/", h.handleGetTaskContainers)

@@ -15,7 +15,7 @@ func main() {
 	fmt.Println("Current Environment : " + current_env)
 	env := configs.InitConfig(current_env)
 	logger := loggers.Setup(env)
-	configs.AccessToken = env.AccessTokenSecret
+	configs.AccessToken = "71871847e4548334f720bf055f30829e28f58a52bb4aae7319d5d775622682cf6ba54671a2c270110be13ffb3fea16b3563e2109a4d24612ac5c5469d9cbc9e5"
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s timezone=UTC connect_timeout=5 ",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)

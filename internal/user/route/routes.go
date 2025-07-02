@@ -26,7 +26,7 @@ func NewHandler(logger *loggers.AppLogger, repo repository.UserRepository, ugRep
 	return &Handler{logger: logger, userRepo: repo, userGroupRepo: ugRepo}
 }
 
-func (h *Handler) RegisterRoutes(router *chi.Mux) {
+func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/users", func(r chi.Router) {
 		r.Get("/", h.handleGetUsers)
 		r.Post("/", h.handleCreateUser)

@@ -27,7 +27,7 @@ type Handler struct {
 func NewHandler(logger *loggers.AppLogger, repo taskRepo.TaskRepository, tcRepo containerRepo.ContainerRepository, ugRepo usergroupRepo.UserGroupRepository) *Handler {
 	return &Handler{logger: logger, taskRepo: repo, containerRepo: tcRepo, groupRepo: ugRepo}
 }
-func (h *Handler) RegisterRoutes(router *chi.Mux) {
+func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/tasks", func(r chi.Router) {
 		r.Get("/", h.handleGetTasks)
 		r.Get("/{taskID}", h.handleGetTask)

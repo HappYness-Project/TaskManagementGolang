@@ -51,9 +51,6 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(middlewares.Logger(s.logger))
 	mux.Use(middleware.Heartbeat("/ping"))
 
-	// Apply JWT verification and authentication to all routes
-	mux.Use(jwtauth.Verifier(s.tokenAuth))
-	mux.Use(jwtauth.Authenticator)
 	mux.Get("/", home)
 	mux.Get("/health", home)
 
@@ -67,10 +64,14 @@ func (s *ApiServer) Setup() *chi.Mux {
 	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
 	containerHandler := containerRoute.NewHandler(containerRepo, userRepo)
 
-	userHandler.RegisterRoutes(mux)
-	usergroupHandler.RegisterRoutes(mux)
-	taskHandler.RegisterRoutes(mux)
-	containerHandler.RegisterRoutes(mux)
+	mux.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(s.tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		userHandler.RegisterRoutes(r)
+		usergroupHandler.RegisterRoutes(r)
+		taskHandler.RegisterRoutes(r)
+		containerHandler.RegisterRoutes(r)
+	})
 
 	return mux
 }

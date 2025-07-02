@@ -26,7 +26,7 @@ type Handler struct {
 func NewHandler(repo repository.UserGroupRepository, userRepo userRepo.UserRepository) *Handler {
 	return &Handler{groupRepo: repo, userRepo: userRepo}
 }
-func (h *Handler) RegisterRoutes(router *chi.Mux) {
+func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/user-groups", func(r chi.Router) {
 		r.Get("/", h.handleGetUserGroups)
 		r.Get("/{groupID}", h.handleGetUserGroupById)
