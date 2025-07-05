@@ -50,12 +50,11 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Use(middlewares.RequestIdMiddleware)
 	mux.Use(middlewares.Logger(s.logger))
 	mux.Use(middleware.Heartbeat("/ping"))
-
 	mux.Get("/", home)
 	mux.Get("/health", home)
 
-	userRepo := userRepo.NewUserRepository(s.db)
-	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db)
+	userRepo := userRepo.NewUserRepository(s.db, s.logger)
+	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db, s.logger)
 	taskRepo := taskRepo.NewTaskRepository(s.db)
 	containerRepo := containerRepo.NewContainerRepository(s.db)
 

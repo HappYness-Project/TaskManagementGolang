@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
+	"github.com/happYness-Project/taskManagementGolang/pkg/errors"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 )
 
 const dbTimeout = time.Second * 5
@@ -21,12 +23,14 @@ type UserGroupRepository interface {
 	DeleteUserGroup(id int) error
 }
 type UserGroupRepo struct {
-	DB *sql.DB
+	DB     *sql.DB
+	logger *loggers.AppLogger
 }
 
-func NewUserGroupRepository(db *sql.DB) *UserGroupRepo {
+func NewUserGroupRepository(db *sql.DB, logger *loggers.AppLogger) *UserGroupRepo {
 	return &UserGroupRepo{
-		DB: db,
+		DB:     db,
+		logger: logger,
 	}
 }
 
@@ -36,6 +40,7 @@ func (m *UserGroupRepo) GetAllUsergroups() ([]*model.UserGroup, error) {
 
 	rows, err := m.DB.QueryContext(ctx, sqlGetAllUsergroups)
 	if err != nil {
+		m.logger.Error().Err(err).Msg(errors.QueryExecutionFailure)
 		return nil, err
 	}
 	defer rows.Close()
@@ -44,6 +49,7 @@ func (m *UserGroupRepo) GetAllUsergroups() ([]*model.UserGroup, error) {
 	for rows.Next() {
 		usergroup, err := scanRowsIntoUsergroup(rows)
 		if err != nil {
+			m.logger.Error().Err(err).Msg(errors.FailedToScanRow)
 			return nil, err
 		}
 
@@ -62,6 +68,7 @@ func (m *UserGroupRepo) GetById(id int) (*model.UserGroup, error) {
 	for rows.Next() {
 		usergroup, err = scanRowsIntoUsergroup(rows)
 		if err != nil {
+			m.logger.Error().Err(err).Int("id", id).Msg(errors.FailedToScanRow)
 			return nil, err
 		}
 	}
@@ -100,6 +107,7 @@ func (m *UserGroupRepo) CreateGroup(ug model.UserGroup) (int, error) {
 func (m *UserGroupRepo) CreateGroupWithUsers(ug model.UserGroup, userId int) (int, error) {
 	tx, err := m.DB.Begin()
 	if err != nil {
+		m.logger.Error().Err(err).Msg(errors.BeginTransactionFailure)
 		return 0, err
 	}
 	defer func() {
@@ -110,6 +118,7 @@ func (m *UserGroupRepo) CreateGroupWithUsers(ug model.UserGroup, userId int) (in
 	lastInsertedId := 0
 	err = tx.QueryRow(sqlCreateUserGroup, ug.GroupName, ug.GroupDesc, ug.Type, ug.Thumbnail, ug.IsActive).Scan(&lastInsertedId)
 	if err != nil {
+		m.logger.Error().Err(err).Msg(errors.FailedDuringTransaction)
 		return 0, fmt.Errorf("unable to insert into usergroup table : %w", err)
 	}
 
@@ -146,6 +155,7 @@ func (m *UserGroupRepo) RemoveUserFromUserGroup(groupId int, userId int) error {
 func (m *UserGroupRepo) DeleteUserGroup(groupId int) error {
 	result, err := m.DB.Exec(sqlDeleteUserGroup, groupId)
 	if err != nil {
+		m.logger.Error().Err(err).Int("group_id", groupId).Msg(errors.QueryExecutionFailure)
 		return fmt.Errorf("unable to delete usergroup table : %w", err)
 	}
 	row, _ := result.RowsAffected()

@@ -6,6 +6,8 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +35,10 @@ func TestUserRepo_GetAllUsers(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
-	userRepo := NewUserRepository(db)
+
+	env := configs.InitConfig("")
+	logger := loggers.Setup(env)
+	userRepo := NewUserRepository(db, logger)
 
 	t.Run("Given single user, When Get All user, return single user", func(t *testing.T) {
 		mockUser := mockUserObj()
