@@ -7,13 +7,18 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/happYness-Project/taskManagementGolang/internal/mocks"
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
+	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 )
 
 func TestTaskContainerHandler(t *testing.T) {
-	repo := &mockContainerRepo{}
-	// userRepo := &mockUserRepo{}
-	handler := NewHandler(repo, nil) // Need to be fixed.
+	env := configs.Env{}
+	logger := loggers.Setup(env)
+	mockContainerRepo := new(mocks.MockContainerRepo)
+	mockUserRepo := new(mocks.MockUserRepo)
+	handler := NewHandler(logger, mockContainerRepo, mockUserRepo)
 
 	t.Run("when get all task containers, Then return status code 200", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/api/task-containers", nil)

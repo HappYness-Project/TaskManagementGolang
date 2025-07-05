@@ -59,9 +59,9 @@ func (s *ApiServer) Setup() *chi.Mux {
 	containerRepo := containerRepo.NewContainerRepository(s.db)
 
 	userHandler := userRoute.NewHandler(s.logger, userRepo, usergroupRepo)
-	usergroupHandler := usergroupRoute.NewHandler(usergroupRepo, userRepo)
+	usergroupHandler := usergroupRoute.NewHandler(s.logger, usergroupRepo, userRepo)
 	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
-	containerHandler := containerRoute.NewHandler(containerRepo, userRepo)
+	containerHandler := containerRoute.NewHandler(s.logger, containerRepo, userRepo)
 
 	mux.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(s.tokenAuth))

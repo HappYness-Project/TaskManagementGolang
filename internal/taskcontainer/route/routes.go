@@ -10,16 +10,18 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/model"
 	container "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	user "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
+	logger        *loggers.AppLogger
 	containerRepo container.ContainerRepository
 	userRepo      user.UserRepository
 }
 
-func NewHandler(repo container.ContainerRepository, userRepo user.UserRepository) *Handler {
-	return &Handler{containerRepo: repo, userRepo: userRepo}
+func NewHandler(logger *loggers.AppLogger, repo container.ContainerRepository, userRepo user.UserRepository) *Handler {
+	return &Handler{logger: logger, containerRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/task-containers", func(r chi.Router) {

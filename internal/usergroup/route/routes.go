@@ -8,23 +8,23 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth"
-	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	userGroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
+	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
 )
 
 type Handler struct {
-	groupRepo     userGroupRepo.UserGroupRepository
-	userRepo      userRepo.UserRepository
-	containerRepo containerRepo.ContainerRepository
+	logger    *loggers.AppLogger
+	groupRepo userGroupRepo.UserGroupRepository
+	userRepo  userRepo.UserRepository
 }
 
-func NewHandler(repo repository.UserGroupRepository, userRepo userRepo.UserRepository) *Handler {
-	return &Handler{groupRepo: repo, userRepo: userRepo}
+func NewHandler(logger *loggers.AppLogger, repo repository.UserGroupRepository, userRepo userRepo.UserRepository) *Handler {
+	return &Handler{logger: logger, groupRepo: repo, userRepo: userRepo}
 }
 func (h *Handler) RegisterRoutes(router chi.Router) {
 	router.Route("/api/user-groups", func(r chi.Router) {
@@ -90,6 +90,7 @@ func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) 
 
 	groupId, err := h.groupRepo.CreateGroupWithUsers(*group, user.Id)
 	if err != nil {
+
 		utils.ErrorJson(w, err, http.StatusBadRequest)
 		return
 	}
