@@ -12,8 +12,10 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	userGroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
+	"github.com/happYness-Project/taskManagementGolang/pkg/constants"
+	"github.com/happYness-Project/taskManagementGolang/pkg/errors"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
-	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/response"
 )
 
 type Handler struct {
@@ -49,31 +51,30 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
-		h.logger.Error().Err(err).Str("ErrorCode", UserGetServerError).
-			Msg("Error occurred during GetAllUsers.")
-		utils.ErrorJson(w, err, http.StatusInternalServerError)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during GetAllUsers.")
+		response.InternalServerError(w)
 		return
 	}
-	utils.SuccessJson(w, users, "success", http.StatusOK)
+	response.SuccessJson(w, users, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil {
-		h.logger.Error().Err(err).Str("ErrorCode", UserGetServerError).Msg("Error occurred during retrieving user.")
-		utils.ErrorJson(w, err, http.StatusInternalServerError)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during retrieving user.")
+		response.InternalServerError(w)
 		return
 	}
 	if user == nil {
-		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound)
-		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
+		h.logger.Error().Str("ErrorCode", UserGetNotFound)
+		response.NotFound(w, UserGetNotFound, "user does not exist")
 		return
 	}
 
 	userDetailDto := new(UserDetailDto)
 	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
-		h.logger.Error().Err(err).Msg("Bad Request")
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Msg("not able to get usergroups by user id.")
+		response.NotFound(w, UserGetNotFound)
 		return
 	}
 	userDetailDto.Id = user.Id
@@ -88,25 +89,27 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	userDetailDto.UserGroup = ugs
 	userDetailDto.DefaultGroupId = user.DefaultGroupId
 
-	utils.SuccessJson(w, userDetailDto, "success", http.StatusOK)
+	response.SuccessJson(w, userDetailDto, "success", http.StatusOK)
 }
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
-		utils.ErrorJson(w, fmt.Errorf("missing Group ID"), http.StatusBadRequest)
+		response.BadRequestMissingParameters(w, "Missing Group Id")
 		return
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid user ID"), http.StatusBadRequest)
+		h.logger.Error().Err(err).Msg("Invalid Group ID")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(constants.InvalidParameter, "Invalid parameter", "Invalid Group Id")))
 		return
 	}
-	user, err := h.userRepo.GetUsersByGroupId(groupId)
-	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("user does not exist"), http.StatusNotFound)
+	users, err := h.userRepo.GetUsersByGroupId(groupId)
+	if err != nil { // should split two error - one is not found, the other is badrequest / server side error.
+		h.logger.Error().Err(err).Msg("Error during Get Users by Group ID")
+		response.NotFound(w, UserGetNotFound, err.Error())
 		return
 	}
-	utils.SuccessJson(w, user, "success", http.StatusOK)
+	response.SuccessJson(w, users, "success", http.StatusOK)
 }
 func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar string) {
 	var user *model.User
@@ -117,20 +120,24 @@ func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar 
 		user, err = h.userRepo.GetUserByUsername(findVar)
 	}
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during responseUser.")
+		response.InternalServerError(w)
 		return
 	}
 	if user.Id == 0 {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound)
+		response.NotFound(w, UserGetNotFound, "cannot find an user")
 		return
 	}
 
 	userDetailDto := new(UserDetailDto)
-	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id)
+	ugs, err := h.userGroupRepo.GetUserGroupsByUserId(user.Id) // TODO Let's double check this - what if there are server errors.
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", GetUserGroupsNotFound).Msg("Error occurred during GetUserGroupsByUserId")
+		response.NotFound(w, GetUserGroupsNotFound, err.Error())
 		return
 	}
+
 	userDetailDto.Id = user.Id
 	userDetailDto.UserId = user.UserId
 	userDetailDto.UserName = user.UserName
@@ -143,12 +150,13 @@ func (h *Handler) responseUser(w http.ResponseWriter, findField string, findVar 
 	userDetailDto.UserGroup = ugs
 	userDetailDto.DefaultGroupId = user.DefaultGroupId
 
-	utils.SuccessJson(w, userDetailDto, "success", http.StatusOK)
+	response.SuccessJson(w, userDetailDto, "success", http.StatusOK)
 }
 func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserDto
-	if err := utils.ParseJson(r, &createDto); err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+	if err := response.ParseJson(r, &createDto); err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg("Invalid JSON body for CreateUserDto")
+		response.InvalidJsonBody(w)
 		return
 	}
 	_, claims, _ := jwtauth.FromContext(r.Context())
@@ -158,38 +166,45 @@ func (h *Handler) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err := h.userRepo.CreateUser(*user)
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot create a user"), http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserCreateServerError).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(UserCreateServerError, "Bad Request", "cannot create a user"))
+		// different error message is required for this
+		// if user already exists, conflict error should return
 		return
 	}
-	utils.SuccessJson(w, map[string]string{"user_id": userId}, "User is created.", http.StatusCreated)
+	response.SuccessJson(w, map[string]string{"user_id": userId}, "User is created.", http.StatusCreated)
 }
 func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	var updateDto UpdateUserDto
-	if err := utils.ParseJson(r, &updateDto); err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+	if err := response.ParseJson(r, &updateDto); err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg("Invalid JSON body for UpdateUserDto")
+		response.InvalidJsonBody(w, "Json body invalid for update user.")
 		return
 	}
 
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).Msg("Error occurred during GetUserByUserId")
+		response.NotFound(w, UserGetNotFound, "cannot find an user")
 		return
 	}
 
-	user.UpdateUser(updateDto.FirstName, updateDto.LastName, updateDto.Email)
+	user.UpdateUser(updateDto.FirstName, updateDto.LastName, updateDto.Email) // Todo : Domain Validation error code.
 
 	err = h.userRepo.UpdateUser(*user)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserUpdateServerError).Msg("Error occurred during UpdateUser")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(UserUpdateServerError, "Bad Request", "Error occurred during Update user.")))
 		return
 	}
-	utils.SuccessJson(w, nil, "User is updated.", http.StatusNoContent)
+	response.SuccessJson(w, nil, "User is updated.", http.StatusNoContent)
 }
 
 func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound) // what if there was an server error.
+		response.NotFound(w, UserGetNotFound, "Not able to find an user")
 		return
 	}
 
@@ -199,21 +214,24 @@ func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
 	var jsonBody JsonBody
 	err = json.NewDecoder(r.Body).Decode(&jsonBody)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError)
+		response.InvalidJsonBody(w, err.Error())
 		return
 	}
 
 	err = user.UpdateDefaultGroupId(jsonBody.DefaultGroupId)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserDomainError).Msg(err.Error())
+		response.BadRequestDomainError(w, UserDomainError, err.Error())
 		return
 	}
 
 	err = h.userRepo.UpdateUser(*user)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserUpdateServerError).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(UserUpdateServerError, errors.Badrequest, "Error ocurred during update an user")))
 		return
 	}
 
-	utils.SuccessJson(w, nil, "Default user group ID is updated.", http.StatusOK)
+	response.SuccessJson(w, nil, "Default user group ID is updated.", http.StatusOK)
 }

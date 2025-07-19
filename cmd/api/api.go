@@ -21,7 +21,7 @@ import (
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/middlewares"
-	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/response"
 )
 
 type ApiServer struct {
@@ -90,5 +90,5 @@ func home(w http.ResponseWriter, r *http.Request) {
 		Message: "Golang Task manager app",
 		Version: "1.0.0",
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, payload)
+	response.WriteJsonWithEncode(w, http.StatusOK, payload)
 }

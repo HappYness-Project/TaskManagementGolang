@@ -2,7 +2,6 @@ package route
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,8 +12,10 @@ import (
 	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	usergroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
+	usergroupRoute "github.com/happYness-Project/taskManagementGolang/internal/usergroup/route"
+	"github.com/happYness-Project/taskManagementGolang/pkg/constants"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
-	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/response"
 )
 
 type Handler struct {
@@ -43,51 +44,58 @@ func (h *Handler) RegisterRoutes(router chi.Router) {
 func (h *Handler) handleGetTasks(w http.ResponseWriter, r *http.Request) {
 	tasks, err := h.taskRepo.GetAllTasks()
 	if err != nil {
-		h.logger.Error().
-			Err(err).
-			Str("ErrorCode", TaskGetServerError).
-			Msg("Error occurred during GetAllTasks.")
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		h.logger.Error().Err(err).Str("ErrorCode", TaskGetServerError).Msg(err.Error())
+		response.InternalServerError(w, "Error occurred during getting all tasks.")
 		return
 	}
-	utils.SuccessJson(w, tasks, "successfully get tasks", http.StatusOK)
+	response.SuccessJson(w, tasks, "successfully get tasks", http.StatusOK)
 }
 func (h *Handler) handleGetTask(w http.ResponseWriter, r *http.Request) {
-	// TODO Requirement - check if container ID is UUID format.
 	task, err := h.taskRepo.GetTaskById(chi.URLParam(r, "taskID"))
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("task does not exist"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskGetNotFound).Msg("Error occurred during GetTask.")
+		response.ErrorResponse(w, http.StatusNotFound, *(response.New(TaskGetNotFound, "Not Found", "task does not exist")))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, task)
+	response.WriteJsonWithEncode(w, http.StatusOK, task)
 }
 
 func (h *Handler) handleGetTasksByContainerId(w http.ResponseWriter, r *http.Request) {
 	containerId := chi.URLParam(r, "containerID")
 	if containerId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing container ID"))
+		h.logger.Error().Msg("container Id missing")
+		response.BadRequestMissingParameters(w)
 		return
 	}
 	tasks, err := h.taskRepo.GetTasksByContainerId(containerId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("getting tasks failure"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskGetServerError).Msg("Error occurred during GetTasksByContainerId")
+		response.ErrorResponse(w, http.StatusInternalServerError, *(response.New(TaskGetServerError, "Failed to get tasks by container id", err.Error())))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
+	response.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }
 
 func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
-	container, err := h.containerRepo.GetById(chi.URLParam(r, "containerID"))
-	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not able to find container"))
+	containerId := chi.URLParam(r, "containerID")
+	if containerId == "" {
+		h.logger.Error().Msg("container Id missing")
+		response.BadRequestMissingParameters(w)
 		return
 	}
-	//TODO Validation logic
 	var createDto CreateTaskDto
-	if err := utils.ParseJson(r, &createDto); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+	if err := response.ParseJson(r, &createDto); err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg("Invalid JSON body for CreateTaskDto")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(constants.RequestBodyError, "Invalid Json Body", err.Error())))
 		return
 	}
+	container, err := h.containerRepo.GetById(containerId)
+	if err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", TaskGetTaskContainerNotFound).Msg("Task container not found")
+		response.ErrorResponse(w, http.StatusNotFound, *(response.New(TaskGetTaskContainerNotFound, "Task container not found", err.Error())))
+		return
+	}
+
 	task := model.Task{
 		TaskId:     uuid.New().String(),
 		TaskName:   createDto.TaskName,
@@ -99,24 +107,27 @@ func (h *Handler) handleCreateTask(w http.ResponseWriter, r *http.Request) {
 		Priority:   createDto.Priority,
 		Category:   createDto.Category,
 	}
-	uuid, err := h.taskRepo.CreateTask(container.Id, task)
+	newTask, err := h.taskRepo.CreateTask(container.Id, task)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		h.logger.Error().Err(err).Str("ErrorCode", TaskCreateServerError).Msg("Error occurred during CreateTask")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskCreateServerError, "Failed to create task", err.Error())))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusCreated, uuid)
+	response.WriteJsonWithEncode(w, http.StatusCreated, newTask)
 }
 
 func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
-	taskId := chi.URLParam(r, "taskID")
 	var updateDto UpdateTaskDto
-	if err := utils.ParseJson(r, &updateDto); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+	if err := response.ParseJson(r, &updateDto); err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg("Invalid JSON body for UpdateTaskDto")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(constants.RequestBodyError, "Request Body Error", err.Error())))
 		return
 	}
+	taskId := chi.URLParam(r, "taskID")
 	task, err := h.taskRepo.GetTaskById(taskId)
 	if err != nil || task == nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("cannot find task"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskGetNotFound).Msg("Cannot find task for update")
+		response.NotFound(w, TaskGetNotFound, "Cannot find task")
 		return
 	}
 
@@ -127,30 +138,36 @@ func (h *Handler) handleUpdateTask(w http.ResponseWriter, r *http.Request) {
 	task.Category = updateDto.Category
 	err = h.taskRepo.UpdateTask(*task)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("not able to update task"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskUpdateServerError).Msg("Not able to update task")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskUpdateServerError, "Failed to update task", err.Error())))
 		return
 	}
-
+	response.WriteJsonWithEncode(w, http.StatusOK, "task updated successfully")
 }
 
 func (h *Handler) handleDeleteTask(w http.ResponseWriter, r *http.Request) {
-	err := h.taskRepo.DeleteTask(chi.URLParam(r, "taskID"))
+	taskId := chi.URLParam(r, "taskID")
+	err := h.taskRepo.DeleteTask(taskId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during deleting a task"))
+		// TODO : Different types of error. need to identify
+		h.logger.Error().Err(err).Str("ErrorCode", TaskDeleteServerError).Msg("Error occurred during deleting a task")
+		response.ErrorResponse(w, http.StatusNotFound, *(response.New(TaskDeleteServerError, "Failed to delete task", err.Error())))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusNoContent, "task has been removed.")
+	response.WriteJsonWithEncode(w, http.StatusNoContent, "task has been removed.")
 }
 
 func (h *Handler) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 	taskId := chi.URLParam(r, "taskID")
 	if taskId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
+		h.logger.Error().Msg("missing Task ID")
+		response.BadRequestMissingParameters(w) // needs to be fixed - Adding missing task id as details.
 		return
 	}
 	task, _ := h.taskRepo.GetTaskById(taskId)
 	if task == nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found task"))
+		h.logger.Error().Msg("not found task")
+		response.NotFound(w, TaskGetNotFound, "Task not found")
 		return
 	}
 
@@ -160,26 +177,31 @@ func (h *Handler) handleDoneTask(w http.ResponseWriter, r *http.Request) {
 	var toggleBody ToggleBody
 	err := json.NewDecoder(r.Body).Decode(&toggleBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		h.logger.Error().Err(err).Msg("Invalid JSON body for toggle completion")
+		response.InvalidJsonBody(w, "Invalid Json body for toggle completion")
 		return
 	}
 
 	err = h.taskRepo.DoneTask(taskId, toggleBody.IsCompleted)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during done task"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskStatusDoneError).Msg("Error occurred during done task")
+		response.ErrorResponse(w, http.StatusNotFound, *(response.New(TaskStatusDoneError, "Failed to toggle done")))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, "task is changed to Done.")
+	response.WriteJsonWithEncode(w, http.StatusOK, "task is changed to Done.")
 }
+
 func (h *Handler) handleImportantTask(w http.ResponseWriter, r *http.Request) {
 	taskId := chi.URLParam(r, "taskID")
 	if taskId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Task ID"))
+		h.logger.Error().Msg("missing Task ID")
+		response.BadRequestMissingParameters(w, "missing task id")
 		return
 	}
 	task, _ := h.taskRepo.GetTaskById(taskId)
 	if task == nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("not found task"))
+		h.logger.Error().Msg("not found task")
+		response.NotFound(w, TaskGetNotFound, "task not found")
 		return
 	}
 
@@ -189,32 +211,37 @@ func (h *Handler) handleImportantTask(w http.ResponseWriter, r *http.Request) {
 	var toggleBody ToggleBody
 	err := json.NewDecoder(r.Body).Decode(&toggleBody)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		h.logger.Error().Err(err).Msg("Invalid JSON body for toggle important")
+		response.InvalidJsonBody(w, "Invalid json body for toggle important")
 		return
 	}
 
 	err = h.taskRepo.UpdateImportantTask(taskId, toggleBody.IsImportant)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("error occurred during important toggle task"))
+		h.logger.Error().Err(err).Str("ErrorCode", TaskUpdateImportantError).Msg("Error occurred during important toggle task")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskUpdateImportantError, "Failed to toggle important")))
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, "task important field is changed.")
+	response.WriteJsonWithEncode(w, http.StatusOK, "task important field is changed.")
 }
 
 func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request) {
 	groupIdVar := chi.URLParam(r, "usergroupID")
 	if groupIdVar == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		h.logger.Error().Msg("missing Group ID")
+		response.BadRequestMissingParameters(w, "missing group id")
 		return
 	}
 	groupId, err := strconv.Atoi(groupIdVar)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		h.logger.Error().Err(err).Msg("invalid Group ID")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(constants.InvalidParameter, "Invalid Group ID")))
 		return
 	}
 	usergroup, err := h.groupRepo.GetById(groupId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("usergroup cannot be found"))
+		h.logger.Error().Err(err).Msg("usergroup cannot be found")
+		response.NotFound(w, usergroupRoute.UserGroupGetNotFound, "usergroup cannot be found")
 		return
 	}
 	var tasks []model.Task
@@ -222,18 +249,21 @@ func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request
 	if r.URL.Query().Get("important") == "true" {
 		tasks, err = h.taskRepo.GetAllTasksByGroupIdOnlyImportant(usergroup.GroupId)
 		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting important tasks"))
+			h.logger.Error().Err(err).Msg("error occurred during getting important tasks")
+			response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskGetServerError, "Failed to get important tasks", err.Error())))
 			return
 		}
 	} else if r.URL.Query().Get("important") == "false" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks - not implemented for false case"))
+		h.logger.Error().Msg("not implemented for false case")
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskGetServerError, "Not implemented for important=false case")))
 		return
 	} else {
 		tasks, err = h.taskRepo.GetAllTasksByGroupId(usergroup.GroupId)
 		if err != nil {
-			utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error ocurred during getting tasks"))
+			h.logger.Error().Err(err).Msg("error occurred during getting tasks")
+			response.ErrorResponse(w, http.StatusBadRequest, *(response.New(TaskGetServerError, "Failed to get tasks")))
 			return
 		}
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, tasks)
+	response.WriteJsonWithEncode(w, http.StatusOK, tasks)
 }

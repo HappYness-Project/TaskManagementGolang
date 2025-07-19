@@ -9,6 +9,10 @@ const (
 	TokenInvalid        = "token invalid"
 	InvalidRefreshToken = "invalid refresh token"
 
+	InternalServerError = "Internal server error"
+	Badrequest          = "bad request"
+	InvalidJsonBody     = "invalid json body format"
+
 	PermissionDenied = "Permission denied"
 
 	// DB

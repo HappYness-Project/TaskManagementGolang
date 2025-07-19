@@ -1,22 +1,17 @@
 package route
 
-import "errors"
-
 const prefix = "users_"
 
-const UnexpectedErrMsg = "unexpected error occurred."
-
 const (
-	UserGetUnauthorized        = prefix + "get_unauthorized"
+	UserServerError = prefix + "server_error"
+	UserDomainError = prefix + "domain_validation_error"
+
 	UserGetNotFound            = prefix + "get_not_found"
+	GetUserGroupsNotFound      = prefix + "get_usergroup_not_found"
 	UserGetRateLimitedExceeded = prefix + "get_rate_limited_exceeded"
-	UserGetServerError         = prefix + "get_server_error"
 
 	UserCreateInvalidInput = prefix + "create_invalid_input"
-	UserCreateUnauthorized = prefix + "create_unauthorized"
 	UserCreateServerError  = prefix + "create_server_error"
-)
 
-var (
-	CreateUserError = errors.New("cannot create a user")
+	UserUpdateServerError = prefix + "update_server_error"
 )

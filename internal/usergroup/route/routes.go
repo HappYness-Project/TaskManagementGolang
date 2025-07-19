@@ -13,8 +13,10 @@ import (
 
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
+	"github.com/happYness-Project/taskManagementGolang/pkg/constants"
+	"github.com/happYness-Project/taskManagementGolang/pkg/errors"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
-	"github.com/happYness-Project/taskManagementGolang/pkg/utils"
+	"github.com/happYness-Project/taskManagementGolang/pkg/response"
 )
 
 type Handler struct {
@@ -42,91 +44,98 @@ func (h *Handler) RegisterRoutes(router chi.Router) {
 func (h *Handler) handleGetUserGroups(w http.ResponseWriter, r *http.Request) {
 	groups, err := h.groupRepo.GetAllUsergroups()
 	if err != nil {
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during responseUser.")
+		response.InternalServerError(w)
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, groups)
+	response.WriteJsonWithEncode(w, http.StatusOK, groups) // TODO this response format needs to be changed.
 }
 func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		h.logger.Error().Str("ErrorCode", constants.MissingParameter).Msg("GroupID is missing")
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(constants.MissingParameter, "Invalid Paramters", "missing Group ID"))
 		return
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid group ID"))
+		h.logger.Error().Str("ErrorCode", constants.InvalidParameter).Msg("Invalid Parameters")
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(constants.InvalidParameter, "Invalid Paramters", "Invalid Group ID"))
 		return
 	}
 
 	group, err := h.groupRepo.GetById(groupId)
 	if err != nil {
-		utils.WriteError(w, http.StatusNotFound, fmt.Errorf("group does not exist"))
+		h.logger.Error().Str("ErrorCode", UserGroupGetNotFound).Msg(fmt.Sprintf("group does not exist. group Id: %d", groupId))
+		response.NotFound(w, UserGroupGetNotFound, "group does not exist")
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, group)
+	response.WriteJsonWithEncode(w, http.StatusOK, group)
 }
 
 // TODO List Testing this method
 func (h *Handler) handleCreateUserGroup(w http.ResponseWriter, r *http.Request) {
 	var createDto CreateUserGroupDto
-	if err := utils.ParseJson(r, &createDto); err != nil {
-		utils.ErrorJson(w, fmt.Errorf("error reading request body"), http.StatusBadRequest)
+	if err := response.ParseJson(r, &createDto); err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg("Json body for CreateUserGroupRequest is invalid")
+		response.InternalServerError(w)
 		return
 	}
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	userid := fmt.Sprintf("%v", claims["nameid"])
 	user, err := h.userRepo.GetUserByUserId(userid)
 	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupGetNotFound).Msg("Not able to find user ID:" + userid)
+		response.ErrorResponse(w, http.StatusNotFound, *(response.New(constants.ServerError, errors.InternalServerError)))
 		return
 	}
 
 	group, err := model.NewUserGroup(createDto.GroupName, createDto.GroupDesc, createDto.GroupType)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupDomainError).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusUnprocessableEntity, *response.New(UserGroupDomainError, "Domain Validation Error", err.Error()))
 		return
 	}
 
 	groupId, err := h.groupRepo.CreateGroupWithUsers(*group, user.Id)
 	if err != nil {
-
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupCreationFailure).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(UserGroupCreationFailure, "Inserting usergroup failed"))
 		return
 	}
 
-	utils.SuccessJson(w, map[string]int{"group_id": groupId}, "User group is created.", http.StatusCreated)
+	response.SuccessJson(w, map[string]int{"group_id": groupId}, "User group is created.", http.StatusCreated)
 }
 
 func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Request) {
 	userId := chi.URLParam(r, "userID")
 	if userId == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing user ID"))
+		h.logger.Error().Msg("missing userID")
+		response.BadRequestMissingParameters(w)
 		return
 	}
 
 	user, err := h.userRepo.GetUserByUserId(userId)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("user does not exist."))
+		h.logger.Error().Err(err).Str("ErrorCode", UserNotFound).Msg("Error during GetUserByUserId")
+		response.NotFound(w, UserNotFound, "Not able to find an user")
+		return
 	}
 
 	groups, err := h.groupRepo.GetUserGroupsByUserId(user.Id)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("error occurred during GetUserGroupsByUserId"))
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupGetNotFound).Msg("Error during GetUserGroupsByUserId")
+		response.NotFound(w, UserGroupGetNotFound, "Not able to find usegroups")
 		return
 	}
-	utils.WriteJsonWithEncode(w, http.StatusOK, groups)
+	response.WriteJsonWithEncode(w, http.StatusOK, groups)
 }
 
 func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "groupID")
-	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
-		return
-	}
-	groupId, err := strconv.Atoi(vars)
+	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid group ID"))
+		h.logger.Error().Err(err).Str("ErrorCode", constants.InvalidParameter).Msg("invalid Group Id")
+		response.BadRequestMissingParameters(w)
 		return
 	}
 
@@ -137,59 +146,70 @@ func (h *Handler) handleAddUserToGroup(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&jsonBody)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError)
+		response.InvalidJsonBody(w, err.Error())
 		return
 	}
 	user, err := h.userRepo.GetUserByUserId(jsonBody.UserId)
 	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserNotFound)
+		response.NotFound(w, UserNotFound, "cannot find an user")
 		return
 	}
 
 	err = h.groupRepo.InsertUserGroupUserTable(groupId, user.Id)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, err)
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupAddUserError).Msg("Error during InsertUserGroupUserTable")
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(UserGroupAddUserError, "Bad Request", "Inserting usergroup failed"))
 		return
 	}
 
-	utils.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is added to the user group ID: %d", groupId))
+	response.WriteJsonWithEncode(w, http.StatusCreated, fmt.Sprintf("User is added to the user group ID: %d", groupId))
 }
 
 func (h *Handler) handleDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("invalid Group ID"), http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.InvalidParameter).Msg("Invalid groupId")
+		response.BadRequestMissingParameters(w, "invalid groupId")
 		return
 	}
 	err = h.groupRepo.DeleteUserGroup(groupId)
 	if err != nil {
-		utils.ErrorJson(w, err, http.StatusBadRequest)
+		h.logger.Error().Err(err).Str("ErrorCode", DeleteUserGroupError).Msg(err.Error())
+		// TODO : Possible error can occur if not found.
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(DeleteUserGroupError, "Bad Request", "Error occurred during deleting user group.")))
 		return
 	}
-	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
+	response.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
 }
 
 func (h *Handler) handleRemoveUserFromGroup(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("missing Group ID"))
+		h.logger.Error().Str("ErrorCode", constants.MissingParameter).Msg("Missing GroupID")
+		response.BadRequestMissingParameters(w, "Missing Group ID")
 		return
 	}
 	groupId, err := strconv.Atoi(vars)
 	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid Group ID"))
+		h.logger.Error().Err(err).Str("ErrorCode", constants.InvalidParameter).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(constants.InvalidParameter, "Invalid Parameter", "Invalid Group ID")))
 		return
 	}
 	userId := chi.URLParam(r, "userID")
 	user, err := h.userRepo.GetUserByUserId(userId)
 	if err != nil || user == nil {
-		utils.ErrorJson(w, fmt.Errorf("cannot find user"), http.StatusNotFound)
+		h.logger.Error().Err(err).Str("ErrorCode", UserNotFound).Msg(err.Error())
+		response.NotFound(w, UserNotFound, "Provided user id cannot be found")
 		return
 	}
 
 	err = h.groupRepo.RemoveUserFromUserGroup(groupId, user.Id)
 	if err != nil {
-		utils.ErrorJson(w, fmt.Errorf("failed to remove user to the user group"), 400)
+		h.logger.Error().Err(err).Str("ErrorCode", RemoveUserFromUserGroupError).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *(response.New(RemoveUserFromUserGroupError, "Bad Request", "Failed to remove a user from usergroup.")))
 		return
 	}
-	utils.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
+	response.SuccessJson(w, nil, fmt.Sprintf("User is removed from user group ID: %d", groupId), 204)
 }
