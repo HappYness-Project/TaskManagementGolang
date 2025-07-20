@@ -17,7 +17,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
+	"github.com/happYness-Project/taskManagementGolang/pkg/constants"
+	"github.com/happYness-Project/taskManagementGolang/pkg/errors"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
+	"github.com/happYness-Project/taskManagementGolang/pkg/response"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -141,12 +144,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "database error")
+		assert.Equal(t, "Internal server error", details.Title)
+		assert.Equal(t, "Error occurred during retrieving user.", details.Detail)
+		assert.Equal(t, constants.ServerError, details.ErrorCode)
 	})
 
 	t.Run("when get user by ID but user not found, Then return status code 404", func(t *testing.T) {
@@ -165,14 +168,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-
-		// Parse error response
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "user does not exist")
+		assert.Equal(t, "Not found", details.Title)
+		assert.Equal(t, "user does not exist", details.Detail)
+		assert.Equal(t, UserGetNotFound, details.ErrorCode)
 	})
 
 	t.Run("when get users by group ID, Then return status code 200 with users", func(t *testing.T) {
@@ -228,14 +229,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-
-		// Parse error response
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "invalid user ID")
+		assert.Equal(t, "Invalid parameter", details.Title)
+		assert.Equal(t, "Invalid Group Id", details.Detail)
+		assert.Equal(t, constants.InvalidParameter, details.ErrorCode)
 	})
 
 	t.Run("when get users by group ID with empty group ID, Then return status code 400", func(t *testing.T) {
@@ -252,12 +251,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
-		// Parse error response
-		var response map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &response)
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "missing Group ID")
+		assert.Equal(t, errors.Badrequest, details.Title)
+		assert.Equal(t, "Missing Group Id", details.Detail)
+		assert.Equal(t, constants.MissingParameter, details.ErrorCode)
 	})
 
 	t.Run("when update user default group ID with valid data, Then return status code 200", func(t *testing.T) {
@@ -331,11 +330,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		var response map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &response)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "group ID cannot be negative")
+		assert.Equal(t, "Domain validation error", details.Title)
+		assert.Equal(t, "group ID cannot be negative", details.Detail)
+		assert.Equal(t, UserDomainError, details.ErrorCode)
 	})
 
 	t.Run("when update user default group ID with same group ID, Then return status code 400", func(t *testing.T) {
@@ -368,19 +368,18 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-
-		// Parse error response
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "group ID is already set to the specified value")
-
-		mockUserRepo.AssertExpectations(t)
+		assert.Equal(t, "Domain validation error", details.Title)
+		assert.Equal(t, "group ID is already set to the specified value", details.Detail)
+		assert.Equal(t, UserDomainError, details.ErrorCode)
 	})
 
 	t.Run("when update user default group ID but user not found, Then return status code 404", func(t *testing.T) {
+		mockUserRepo.ExpectedCalls = nil
+		mockUserGroupRepo.ExpectedCalls = nil
+
 		userID := "non-existent-user"
 		mockUserRepo.On("GetUserByUserId", userID).Return((*userModel.User)(nil), nil)
 		requestBody := `{"default_group_id": 5}`
@@ -394,11 +393,13 @@ func TestUserHandler(t *testing.T) {
 		})
 
 		router.ServeHTTP(rr, req)
+
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		var response map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &response)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "cannot find user")
+		assert.Equal(t, "Not found", details.Title)
+		assert.Equal(t, "Not able to find a user", details.Detail)
+		assert.Equal(t, UserGetNotFound, details.ErrorCode)
 	})
 
 	t.Run("when update user default group ID with invalid JSON, Then return status code 400", func(t *testing.T) {
@@ -429,7 +430,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
+		assert.Equal(t, "Invalid json body format", details.Title)
+		assert.Equal(t, "Invalid json format for default_group_id", details.Detail)
+		assert.Equal(t, constants.RequestBodyError, details.ErrorCode)
 	})
 
 	t.Run("when update user with valid data, Then return status code 204", func(t *testing.T) {
@@ -495,13 +501,12 @@ func TestUserHandler(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
+		var details response.ProblemDetails
+		json.Unmarshal(rr.Body.Bytes(), &details)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
-		var response map[string]interface{}
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.True(t, response["error"].(bool))
-		assert.Contains(t, response["message"], "cannot find user")
-		mockUserRepo.AssertExpectations(t)
+		assert.Equal(t, "Not found", details.Title)
+		assert.Equal(t, "cannot find a user", details.Detail)
+		assert.Equal(t, UserGetNotFound, details.ErrorCode)
 	})
 
 }

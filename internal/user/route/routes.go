@@ -60,8 +60,8 @@ func (h *Handler) handleGetUsers(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil {
-		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during retrieving user.")
-		response.InternalServerError(w)
+		h.logger.Error().Err(err).Str("ErrorCode", constants.ServerError).Msg("Error occurred during GetUserByUserId")
+		response.InternalServerError(w, "Error occurred during retrieving user.")
 		return
 	}
 	if user == nil {
@@ -185,7 +185,7 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
 	if err != nil || user == nil {
 		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound).Msg("Error occurred during GetUserByUserId")
-		response.NotFound(w, UserGetNotFound, "cannot find an user")
+		response.NotFound(w, UserGetNotFound, "cannot find a user")
 		return
 	}
 
@@ -201,21 +201,21 @@ func (h *Handler) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) handleUpdateGroupId(w http.ResponseWriter, r *http.Request) {
-	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
-	if err != nil || user == nil {
-		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound) // what if there was an server error.
-		response.NotFound(w, UserGetNotFound, "Not able to find an user")
-		return
-	}
-
 	type JsonBody struct {
 		DefaultGroupId int `json:"default_group_id"`
 	}
 	var jsonBody JsonBody
-	err = json.NewDecoder(r.Body).Decode(&jsonBody)
+	err := json.NewDecoder(r.Body).Decode(&jsonBody)
 	if err != nil {
-		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError)
-		response.InvalidJsonBody(w, err.Error())
+		h.logger.Error().Err(err).Str("ErrorCode", constants.RequestBodyError).Msg(err.Error())
+		response.InvalidJsonBody(w, "Invalid json format for default_group_id")
+		return
+	}
+
+	user, err := h.userRepo.GetUserByUserId(chi.URLParam(r, "userID"))
+	if err != nil || user == nil {
+		h.logger.Error().Err(err).Str("ErrorCode", UserGetNotFound) // what if there was an server error.
+		response.NotFound(w, UserGetNotFound, "Not able to find a user")
 		return
 	}
 

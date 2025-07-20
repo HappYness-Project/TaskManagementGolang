@@ -1,17 +1,15 @@
 package errors
 
 const (
-	// Token
-	UnExpectedError     = "Expected error"
 	ClaimsNotFound      = "Claims not found"
-	TokenRequired       = "token required"
-	TokenExpired        = "token expired"
-	TokenInvalid        = "token invalid"
-	InvalidRefreshToken = "invalid refresh token"
+	TokenRequired       = "Token required"
+	TokenExpired        = "Token expired"
+	TokenInvalid        = "Token invalid"
+	InvalidRefreshToken = "Invalid refresh token"
 
 	InternalServerError = "Internal server error"
-	Badrequest          = "bad request"
-	InvalidJsonBody     = "invalid json body format"
+	Badrequest          = "Bad request"
+	InvalidJsonBody     = "Invalid json body format"
 
 	PermissionDenied = "Permission denied"
 

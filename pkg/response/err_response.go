@@ -26,7 +26,7 @@ func BadRequestMissingParameters(w http.ResponseWriter, detail ...string) {
 	ErrorResponse(w, http.StatusBadRequest, *(New(constants.MissingParameter, errors.Badrequest, detail...)))
 }
 func BadRequestDomainError(w http.ResponseWriter, err_code string, details ...string) {
-	p := New(err_code, "Domain Error", details...)
+	p := New(err_code, "Domain validation error", details...)
 	ErrorResponse(w, http.StatusBadRequest, *p)
 }
 func NotFound(w http.ResponseWriter, err_code string, details ...string) {
