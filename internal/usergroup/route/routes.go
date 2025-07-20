@@ -51,23 +51,23 @@ func (h *Handler) handleGetUserGroups(w http.ResponseWriter, r *http.Request) {
 	response.WriteJsonWithEncode(w, http.StatusOK, groups) // TODO this response format needs to be changed.
 }
 func (h *Handler) handleGetUserGroupById(w http.ResponseWriter, r *http.Request) {
-	vars := chi.URLParam(r, "groupID")
-	if vars == "" {
-		h.logger.Error().Str("ErrorCode", constants.MissingParameter).Msg("GroupID is missing")
-		response.ErrorResponse(w, http.StatusBadRequest, *response.New(constants.MissingParameter, "Invalid Paramters", "missing Group ID"))
-		return
-	}
-	groupId, err := strconv.Atoi(vars)
+	groupId, err := strconv.Atoi(chi.URLParam(r, "groupID"))
 	if err != nil {
-		h.logger.Error().Str("ErrorCode", constants.InvalidParameter).Msg("Invalid Parameters")
+		h.logger.Error().Err(err).Str("ErrorCode", constants.InvalidParameter).Msg("Invalid Parameters for GroupID")
 		response.ErrorResponse(w, http.StatusBadRequest, *response.New(constants.InvalidParameter, "Invalid Paramters", "Invalid Group ID"))
 		return
 	}
 
 	group, err := h.groupRepo.GetById(groupId)
-	if err != nil {
+	if group.GroupId == 0 {
 		h.logger.Error().Str("ErrorCode", UserGroupGetNotFound).Msg(fmt.Sprintf("group does not exist. group Id: %d", groupId))
 		response.NotFound(w, UserGroupGetNotFound, "group does not exist")
+		return
+	}
+
+	if err != nil {
+		h.logger.Error().Err(err).Str("ErrorCode", UserGroupServerError).Msg(err.Error())
+		response.ErrorResponse(w, http.StatusBadRequest, *response.New(UserGroupServerError, "Bad Request", "Error occurred during retrieving by group id"))
 		return
 	}
 	response.WriteJsonWithEncode(w, http.StatusOK, group)
@@ -118,7 +118,7 @@ func (h *Handler) handleGetUserGroupByUserId(w http.ResponseWriter, r *http.Requ
 	user, err := h.userRepo.GetUserByUserId(userId)
 	if err != nil {
 		h.logger.Error().Err(err).Str("ErrorCode", UserNotFound).Msg("Error during GetUserByUserId")
-		response.NotFound(w, UserNotFound, "Not able to find an user")
+		response.NotFound(w, UserNotFound, "Not able to find a user")
 		return
 	}
 

@@ -31,5 +31,5 @@ func BadRequestDomainError(w http.ResponseWriter, err_code string, details ...st
 }
 func NotFound(w http.ResponseWriter, err_code string, details ...string) {
 	p := New(err_code, "Not found", details...)
-	ErrorResponse(w, http.StatusBadRequest, *p)
+	ErrorResponse(w, http.StatusNotFound, *p)
 }
