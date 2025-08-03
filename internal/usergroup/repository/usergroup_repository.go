@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/happYness-Project/taskManagementGolang/internal/usergroup/model"
-	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 )
 
 const dbTimeout = time.Second * 5
@@ -25,7 +24,7 @@ type UserGroupRepo struct {
 	DB *sql.DB
 }
 
-func NewUserGroupRepository(db *sql.DB, logger *loggers.AppLogger) *UserGroupRepo {
+func NewUserGroupRepository(db *sql.DB) *UserGroupRepo {
 	return &UserGroupRepo{
 		DB: db,
 	}

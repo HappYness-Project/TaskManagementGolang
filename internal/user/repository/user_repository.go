@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/happYness-Project/taskManagementGolang/internal/user/model"
-	"github.com/happYness-Project/taskManagementGolang/pkg/errors"
-	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 )
 
 type UserRepository interface {
@@ -19,12 +17,11 @@ type UserRepository interface {
 	UpdateUser(user model.User) error
 }
 type UserRepo struct {
-	DB     *sql.DB
-	logger *loggers.AppLogger
+	DB *sql.DB
 }
 
-func NewUserRepository(db *sql.DB, logger *loggers.AppLogger) *UserRepo {
-	return &UserRepo{DB: db, logger: logger}
+func NewUserRepository(db *sql.DB) *UserRepo {
+	return &UserRepo{DB: db}
 }
 
 func (s *UserRepo) GetAllUsers() ([]*model.User, error) {
@@ -116,18 +113,15 @@ func (m *UserRepo) CreateUser(user model.User) error {
 
 	tx, err := m.DB.Begin()
 	if err != nil {
-		m.logger.Error().Err(err).Msg("Failed to begin transaction for user creation")
-		return fmt.Errorf(errors.BeginTransactionFailure)
+		return err
 	}
 
 	_, err = tx.Exec(sqlCreateUser, user.UserId, user.UserName, user.FirstName, user.LastName, user.Email, user.IsActive, user.CreatedAt, user.UpdatedAt, user.DefaultGroupId)
 	if err != nil {
-		m.logger.Error().Err(err).Str("user_id", user.UserId).Msg(errors.QueryExecutionFailure)
 		return fmt.Errorf("unable to insert into user table : %w", err)
 	}
 
 	if err = tx.Commit(); err != nil {
-		m.logger.Error().Err(err).Str("user_id", user.UserId).Msg(errors.CommitTransactionFailure)
 		return fmt.Errorf("commit failure: %w", err)
 	}
 

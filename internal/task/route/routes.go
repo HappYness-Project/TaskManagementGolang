@@ -240,7 +240,7 @@ func (h *Handler) handleGetTasksByGroupId(w http.ResponseWriter, r *http.Request
 	}
 	usergroup, err := h.groupRepo.GetById(groupId)
 	if err != nil {
-		h.logger.Error().Err(err).Msg("usergroup cannot be found")
+		h.logger.Error().Err(err).Msg("usergroup cannot be found") // TODO Error code here?
 		response.NotFound(w, usergroupRoute.UserGroupGetNotFound, "usergroup cannot be found")
 		return
 	}

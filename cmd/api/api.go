@@ -9,11 +9,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth"
 
+	chatRepo "github.com/happYness-Project/taskManagementGolang/internal/chat/repository"
 	taskRepo "github.com/happYness-Project/taskManagementGolang/internal/task/repository"
 	containerRepo "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/repository"
 	userRepo "github.com/happYness-Project/taskManagementGolang/internal/user/repository"
 	usergroupRepo "github.com/happYness-Project/taskManagementGolang/internal/usergroup/repository"
 
+	chatRoute "github.com/happYness-Project/taskManagementGolang/internal/chat/route"
 	taskRoute "github.com/happYness-Project/taskManagementGolang/internal/task/route"
 	containerRoute "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/route"
 	userRoute "github.com/happYness-Project/taskManagementGolang/internal/user/route"
@@ -53,15 +55,17 @@ func (s *ApiServer) Setup() *chi.Mux {
 	mux.Get("/", home)
 	mux.Get("/health", home)
 
-	userRepo := userRepo.NewUserRepository(s.db, s.logger)
-	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db, s.logger)
+	userRepo := userRepo.NewUserRepository(s.db)
+	usergroupRepo := usergroupRepo.NewUserGroupRepository(s.db)
 	taskRepo := taskRepo.NewTaskRepository(s.db)
 	containerRepo := containerRepo.NewContainerRepository(s.db)
+	chatRepo := chatRepo.NewChatRepository(s.db)
 
 	userHandler := userRoute.NewHandler(s.logger, userRepo, usergroupRepo)
 	usergroupHandler := usergroupRoute.NewHandler(s.logger, usergroupRepo, userRepo)
 	taskHandler := taskRoute.NewHandler(s.logger, taskRepo, containerRepo, usergroupRepo)
 	containerHandler := containerRoute.NewHandler(s.logger, containerRepo, userRepo)
+	chatHandler := chatRoute.NewHandler(s.logger, chatRepo, usergroupRepo)
 
 	mux.Group(func(r chi.Router) {
 		r.Use(jwtauth.Verifier(s.tokenAuth))
@@ -70,6 +74,7 @@ func (s *ApiServer) Setup() *chi.Mux {
 		usergroupHandler.RegisterRoutes(r)
 		taskHandler.RegisterRoutes(r)
 		containerHandler.RegisterRoutes(r)
+		chatHandler.RegisterRoutes(r)
 	})
 
 	return mux
