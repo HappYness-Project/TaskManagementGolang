@@ -1,6 +1,6 @@
 module github.com/happYness-Project/taskManagementGolang
 
-go 1.23.2
+go 1.24.5
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
