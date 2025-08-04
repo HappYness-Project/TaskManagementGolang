@@ -94,6 +94,7 @@ func (h *Handler) handleGetUser(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) handleGetUsersByGroupId(w http.ResponseWriter, r *http.Request) {
 	vars := chi.URLParam(r, "groupID")
 	if vars == "" {
+		h.logger.Error().Msg("Missing Group ID")
 		response.BadRequestMissingParameters(w, "Missing Group Id")
 		return
 	}

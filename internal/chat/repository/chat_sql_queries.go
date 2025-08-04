@@ -1,13 +1,10 @@
 package repository
 
 const (
-	GetAllChats                = `SELECT * FROM public.chat`
-	GetChatsByUserGroupIdQuery = `
-		SELECT id, type, usergroup_id, container_id, created_at
-		FROM chat
-		WHERE usergroup_id = $1
-		ORDER BY created_at DESC
-	`
+	GetAllChats          = `SELECT * FROM public.chat`
+	GetChatByUserGroupId = `SELECT id, type, usergroup_id, container_id, created_at
+							FROM public.chat
+							WHERE usergroup_id = $1 and type = 'group'`
 
 	GetChatByIdQuery = `
 		SELECT id, type, usergroup_id, container_id, created_at
