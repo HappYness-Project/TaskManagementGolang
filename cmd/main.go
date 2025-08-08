@@ -25,13 +25,14 @@ func main() {
 	}
 
 	logger.Info().Msg(connStr)
+	logger.Info().Msg(env.AccessTokenSecret)
 	database, err := dbs.ConnectToDb(connStr)
 	if err != nil {
 		logger.Error().Err(err).Msg("Unable to connect to the database.")
 		return
 	}
 
-	server := api.NewApiServer(fmt.Sprintf("%s:%s", env.Host, env.Port), database, logger)
+	server := api.NewApiServer(fmt.Sprintf("%s:%s", env.Host, env.Port), env.AccessTokenSecret, database, logger)
 	r := server.Setup()
 	if err := server.Run(r); err != nil {
 		logger.Error().Err(err).Msg("Unable to set up the server.")

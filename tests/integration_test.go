@@ -13,7 +13,6 @@ import (
 
 func runTestServer() *httptest.Server {
 	env := configs.InitConfig("integration_test.env")
-	configs.AccessToken = env.AccessTokenSecret
 	var connStr = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=UTC connect_timeout=5",
 		env.DBHost, env.DBPort, env.DBUser, env.DBPwd, env.DBName)
 	logger := loggers.Setup(env)
@@ -23,6 +22,6 @@ func runTestServer() *httptest.Server {
 		log.Fatal(err)
 	}
 
-	server := api.NewApiServer(fmt.Sprintf(":%d", 8000), database, logger)
+	server := api.NewApiServer(fmt.Sprintf(":%d", 8000), env.AccessTokenSecret, database, logger)
 	return httptest.NewServer(server.Setup())
 }

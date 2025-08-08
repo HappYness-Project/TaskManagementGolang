@@ -27,8 +27,6 @@ type Env struct {
 	RefreshTokenSecret     string `mapstructure:"REFRESH_TOKEN_SECRET"`
 }
 
-var AccessToken string // updated from the main package.
-
 func InitConfig(envString string) Env {
 	env := Env{}
 	if envString == "" {

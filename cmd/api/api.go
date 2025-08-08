@@ -20,7 +20,6 @@ import (
 	containerRoute "github.com/happYness-Project/taskManagementGolang/internal/taskcontainer/route"
 	userRoute "github.com/happYness-Project/taskManagementGolang/internal/user/route"
 	usergroupRoute "github.com/happYness-Project/taskManagementGolang/internal/usergroup/route"
-	"github.com/happYness-Project/taskManagementGolang/pkg/configs"
 	"github.com/happYness-Project/taskManagementGolang/pkg/loggers"
 	"github.com/happYness-Project/taskManagementGolang/pkg/middlewares"
 	"github.com/happYness-Project/taskManagementGolang/pkg/response"
@@ -33,8 +32,8 @@ type ApiServer struct {
 	logger    *loggers.AppLogger
 }
 
-func NewApiServer(addr string, db *sql.DB, logger *loggers.AppLogger) *ApiServer {
-	tokenAuth := jwtauth.New("HS512", []byte(configs.AccessToken), nil)
+func NewApiServer(addr string, accessToken string, db *sql.DB, logger *loggers.AppLogger) *ApiServer {
+	tokenAuth := jwtauth.New("HS512", []byte(accessToken), nil)
 
 	return &ApiServer{
 		addr:      addr,
